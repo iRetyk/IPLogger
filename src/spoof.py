@@ -16,7 +16,7 @@ import random
 from netwroking import Spoofer
 
 if (len(sys.argv) != 4):
-    print("Wrong usage. Usage- spoof.py <host_ip> <target_ip> <router_ip>")
+    print(f"Wrong usage. Usage- spoof.py <host_ip> <target_ip> <router_ip> and not {sys.argv}")
     sys.exit(0)
 
 
