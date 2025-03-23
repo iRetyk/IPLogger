@@ -20,6 +20,7 @@ def stop_spoofing() -> None:
     print("Killing spoofer....")
     try:
         spoof_process.terminate()
+        time.sleep(0.5)
         print("Process killed")
     except Exception as e:
         print("couldn't kill process")

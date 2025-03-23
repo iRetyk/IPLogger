@@ -22,30 +22,37 @@ if (len(sys.argv) != 4):
 
 class Spoof():
     def __init__(self) -> None:
-        self.__spoof_obj : Spoofer = Spoofer(*sys.argv)
+        self.__spoof_obj : Spoofer = Spoofer(*sys.argv[1:])
         # Setup signal handler function as the signal function.
         signal.signal(signal.SIGTERM,self.signal_handler)
 
     def signal_handler(self,sig,frame):
-        print("Shutting down....")
-        self.__spoof_obj.checkout()
+        print("Shutting down gracfully")
+        if DEBUG:
+            pass
+        else:
+            self.__spoof_obj.checkout()
         sys.exit(0)
 
 
     def spoof(self):
-        while True:
-            self.__spoof_obj.spoof()
-            time.sleep(random.random()/5) # wait a random number between 0-0.2
-            # The time.sleep has 2 jobs - 
-            #   first, make the spoof harder to notice.
-            #   second, the signal can only be received if the process is waiting, and not running.
-            #       thus, without the time the signal wouldn't be registered.
+        if DEBUG:
+            while True:
+                print("Sent packet.... (not really)")
+                time.sleep(1)
+        else:
+            while True:
+                self.__spoof_obj.spoof()
+                time.sleep(random.random()/5) # wait a random number between 0-0.2
+                # The time.sleep has 2 jobs - 
+                #   first, make the spoof harder to notice.
+                #   second, the signal can only be received if the process is waiting, and not running.
+                #       thus, without the time the signal wouldn't be registered.
 
 
 def debug_main():
-    while True:
-        print("Sent packet.... (not really)")
-        time.sleep(1)
+    spoofer = Spoof()
+    spoofer.spoof()
 
 
 def main():
@@ -54,6 +61,7 @@ def main():
 
 if __name__ == "__main__":
     if DEBUG:
+        print("Running spoof.py on debug mode.")
         debug_main()
     else:
         main()
