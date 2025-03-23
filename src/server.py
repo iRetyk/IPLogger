@@ -1,6 +1,6 @@
 
 import subprocess
-
+import time
 
 spoof_process: subprocess.Popen
 
@@ -18,7 +18,7 @@ def stop_spoofing() -> None:
     """
     print("Killing spoofer....")
     try:
-        spoof_process.kill()
+        spoof_process.terminate()
         print("Process killed")
     except:
         print("couldn't kill process")
@@ -27,7 +27,8 @@ def stop_spoofing() -> None:
 def main():
     start_spoofing("1","!","2")
     print("Started process....")
-    
+    time.sleep(6)
+    stop_spoofing()
 
 
 if __name__ == "__main__":
