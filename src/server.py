@@ -9,7 +9,8 @@ def start_spoofing(host_ip: str,target_ip: str,router_ip: str) -> None:
     """
     ths function will start a process that spams spoofed packets.
     """
-    subprocess.Popen(["python","spoof.py",host_ip,target_ip,router_ip])
+    global spoof_process
+    spoof_process = subprocess.Popen(["python","spoof.py",host_ip,target_ip,router_ip])
 
 
 def stop_spoofing() -> None:
@@ -20,8 +21,9 @@ def stop_spoofing() -> None:
     try:
         spoof_process.terminate()
         print("Process killed")
-    except:
+    except Exception as e:
         print("couldn't kill process")
+        print(str(e))
 
 
 def main():
