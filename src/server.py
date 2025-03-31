@@ -2,6 +2,9 @@
 import subprocess
 import time
 
+
+from socket_wrapper import Server
+
 spoof_process: subprocess.Popen
 
 
@@ -28,6 +31,11 @@ def stop_spoofing() -> None:
 
 
 def main():
+    
+    server: Server = Server(12344)
+    
+    
+    
     start_spoofing("1","!","2")
     print("Started process....")
     time.sleep(6)
