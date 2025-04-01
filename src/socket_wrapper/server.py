@@ -2,6 +2,7 @@ import socket
 import random
 import string
 import json
+from pathlib import Path
 from functools import wraps
 
 
@@ -11,12 +12,14 @@ class Server:
         b"code": "corresponding function",
         b"ADD": "add_url",
         b"DEL": "remove_url",
-        b"GET": "get_url",
+        b"GET": "get_real_url",
     }
 
-    urls_path = "../urls.json"
+    urls_path = f"{Path(__file__).parent.parent}/urls.json"
 
-    def __init__(self, port: int) -> None:
+    def __init__(self, port: int = 0) -> None:
+        self.__DEBUG = not bool(port)  # If port == 0 -> debug = true
+
         self.__ip = "127.0.0.1"  # Host ip
         self.__port = port
 
@@ -116,12 +119,9 @@ class Server:
             b'ACK' (bytes): if operation was completed successfully.
             b'ERR~<function_number>~<error_number> (bytes): If there was an error.
         """
-        not_found_err_msg = (
-            f"ERR~{list(self.func_table.values()).index('remove_url')}~0"
-        )
-        val = urls.pop(
-            fake_url.decode(), not_found_err_msg
-        )  # If the url doesn't exist within the url dict, return error msg.
+        
+        not_found_err_msg = (f"ERR~{list(self.func_table.values()).index('remove_url')}~0")
+        val = urls.pop(fake_url.decode(), not_found_err_msg)  # If the url doesn't exist within the url dict, return error msg.
         if "ERR" in val:
             to_return: bytes = val.encode()
         else:
@@ -138,10 +138,8 @@ class Server:
             b'ACK' (bytes): if operation was completed successfully.
             b'ERR~<function_number>~<error_number> (bytes): If there was an error.
         """
-        not_found_err_msg = f"ERR~{list(self.func_table.values()).index('get_url')}~0"
-        val = urls.get(
-            fake_url.decode(), not_found_err_msg
-        )  # If the url doesn't exist within the url dict, return error msg.
+        not_found_err_msg = (f"ERR~{list(self.func_table.values()).index('get_real_url')}~0")
+        val = urls.get(fake_url.decode(), not_found_err_msg)  # If the url doesn't exist within the url dict, return error msg.
         return val.encode()
 
     ###### Helper functions - shouldn't be called by instance of the class #########
@@ -149,18 +147,7 @@ class Server:
     def generate_fake_url(self) -> str:
         """Generate a slightly realistic fake URL with a domain and path."""
         tlds = ["com", "net", "org", "info", "biz"]
-        words = [
-            "tech",
-            "cloud",
-            "data",
-            "hub",
-            "media",
-            "net",
-            "shop",
-            "world",
-            "global",
-            "secure",
-        ]
+        words = ["tech","cloud","data","hub","media","net","shop","world","global","secu"]
 
         random_string = lambda length: "".join(
             random.choices(string.ascii_lowercase, k=length)
