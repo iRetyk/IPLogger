@@ -4,16 +4,11 @@ import string
 import json
 from pathlib import Path
 from functools import wraps
-
+from typing import Callable
 
 class Server:
 
-    func_table: dict[bytes, str] = {
-        b"code": "corresponding function",
-        b"ADD": "add_url",
-        b"DEL": "remove_url",
-        b"GET": "get_real_url",
-    }
+    
 
     urls_path = f"{Path(__file__).parent.parent}/urls.json"
 
@@ -49,12 +44,16 @@ class Server:
 
         return msg
 
+    
+    def send_by_size(self,to_send):
+        self.__sock.send(f'{len(to_send)}~{to_send}'.encode())
+    
     def parse(self, data: bytes) -> bytes:
-        """Parse data, call apropriate function in Server class.
+        """Parse data, call appropriate function in Server class.
         Performs the actions required, and return answer according to protocol
 
         Args:
-            data (bytes): data from server
+            data (bytes): data from client
 
         Returns:
             bytes: answer according to protocol
@@ -62,8 +61,7 @@ class Server:
         fields: list[bytes] = data.split(b"~")
 
         code: bytes = fields[0]
-
-        result: bytes = eval(f"self.{Server.func_table[code]}(*fields[1:])")
+        result: bytes = Server.func_table[code](*fields[1:])
         return result
 
     def server_hello(self):
@@ -120,7 +118,7 @@ class Server:
             b'ERR~<function_number>~<error_number> (bytes): If there was an error.
         """
         
-        not_found_err_msg = (f"ERR~{list(self.func_table.values()).index('remove_url')}~0")
+        not_found_err_msg = (f"ERR~{list(self.func_table.values()).index(self.remove_url)}~0")
         val = urls.pop(fake_url.decode(), not_found_err_msg)  # If the url doesn't exist within the url dict, return error msg.
         if "ERR" in val:
             to_return: bytes = val.encode()
@@ -138,7 +136,7 @@ class Server:
             b'ACK' (bytes): if operation was completed successfully.
             b'ERR~<function_number>~<error_number> (bytes): If there was an error.
         """
-        not_found_err_msg = (f"ERR~{list(self.func_table.values()).index('get_real_url')}~0")
+        not_found_err_msg = (f"ERR~{list(self.func_table.values()).index(self.get_real_url)}~0")
         val = urls.get(fake_url.decode(), not_found_err_msg)  # If the url doesn't exist within the url dict, return error msg.
         return val.encode()
 
@@ -157,3 +155,10 @@ class Server:
         path = f"/{random.choice(words)}{random_string(2)}/{random_string(4)}"
 
         return f"https://{domain}.{path}"
+
+    
+    func_table: dict[bytes,Callable] = {
+        b"ADD": add_url,
+        b"DEL": remove_url,
+        b"GET": get_real_url,
+    }

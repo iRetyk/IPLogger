@@ -32,13 +32,19 @@ def stop_spoofing() -> None:
 
 def main():
     
+    host_ip, target_ip,router_ip = "0","0","0"
+    start_spoofing(host_ip, target_ip,router_ip)
+    
     server: Server = Server(12344)
+    while True:
+        
+        from_client: bytes  = server.recv_by_size()
+        if not from_client:
+            break
+        to_send = server.parse(from_client)
+        
+        server.send_by_size(to_send)
     
-    
-    
-    start_spoofing("1","!","2")
-    print("Started process....")
-    time.sleep(6)
     stop_spoofing()
 
 
