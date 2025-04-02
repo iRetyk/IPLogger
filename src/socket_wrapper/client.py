@@ -1,14 +1,13 @@
-import socket
+from .network_wrapper import NetworkWrapper
 
-class Client:
-    def __init__(self,ip: str,port: int) -> None:
+
+class Client(NetworkWrapper):
+    def __init__(self, ip: str, port: int) -> None:
+        super().__init__()
         self.__ip = ip
         self.__port = port
 
-        self.__sock = socket.socket()
-        
-        self.__sock.connect((self.__ip,self.__port))
-    
+        self._sock.connect((self.__ip, self.__port))
     
     def menu(self) -> int:
         # Input a number from user
@@ -24,7 +23,7 @@ class Client:
     
     def add_url(self, real_url: str):
         # Input from user the url.
-        # Than build and return the request.
+        # Then build and return the request.
         pass
     
     def remove_url(self, url: str):
@@ -34,7 +33,5 @@ class Client:
     
     def req_info(self, url):
         # Input from user the url.
-        # Than build and return the request.
+        # Then build and return the request.
         pass
-    
-    
