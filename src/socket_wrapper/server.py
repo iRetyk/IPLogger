@@ -29,8 +29,8 @@ class Server(NetworkWrapper):
         result: bytes = Server.func_table[code](*fields[1:])
         return result
     
-    def server_hello(self):
-        pass
+    def server_hello(self) -> bytes:
+        return b'ACK'
     
     def show_stats(self):
         pass
@@ -92,6 +92,7 @@ class Server(NetworkWrapper):
         b"ADD": add_url,
         b"DEL": remove_url,
         b"GET": get_real_url,
+        b"HELLO": server_hello
     }
 
 
