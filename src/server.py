@@ -1,7 +1,7 @@
 
 import subprocess
 import time
-
+import traceback
 
 from socket_wrapper import Server
 
@@ -31,21 +31,27 @@ def stop_spoofing() -> None:
 
 
 def main():
-    
+
     host_ip, target_ip,router_ip = "0","0","0"
-    start_spoofing(host_ip, target_ip,router_ip)
+    #start_spoofing(host_ip, target_ip,router_ip)
     
     server: Server = Server(12344)
-    while True:
+    try:
+        while True:
+            
+            from_client: bytes  = server.recv_by_size()
+            if not from_client:
+                break
+            to_send = server.parse(from_client)
+            
+            server.send_by_size(to_send)
         
-        from_client: bytes  = server.recv_by_size()
-        if not from_client:
-            break
-        to_send = server.parse(from_client)
-        
-        server.send_by_size(to_send)
-    
-    stop_spoofing()
+        #stop_spoofing()
+    except Exception as err:
+        print(f'General error: {err}')
+        print(traceback.format_exc())
+    finally:
+        server.cleanup()
 
 
 if __name__ == "__main__":

@@ -26,8 +26,12 @@ class NetworkWrapper:
 
         while len(msg) != size:
             msg += self._sock.recv(128)
-
+        
+        # log
+        print("Received >>>" + msg.decode())
         return msg
 
     def send_by_size(self, to_send: bytes):
-        self._sock.send(f'{len(to_send)}~{to_send}'.encode())
+        to_send = f'{len(to_send)}~{to_send.decode()}'.encode()
+        print(" Sending>>>>> " + to_send.decode())
+        self._sock.send(to_send)

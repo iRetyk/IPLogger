@@ -1,12 +1,16 @@
-import socket
+import sys
 import random
 import string
 import json
+import os
 from pathlib import Path
 from functools import wraps
 from typing import Callable
 
-from .network_wrapper import NetworkWrapper
+
+sys.path.append(os.path.abspath(os.path.join(__file__, "..", "..")))
+
+from socket_wrapper.network_wrapper import NetworkWrapper
 
 
 
@@ -22,14 +26,24 @@ class Server(NetworkWrapper):
 
         self._sock.bind((self.__ip, self.__port))
         self._sock.listen(100)
+        self._sock,addr = self._sock.accept()
     
     def parse(self, data: bytes) -> bytes:
         fields: list[bytes] = data.split(b"~")
         code: bytes = fields[0]
-        result: bytes = Server.func_table[code](*fields[1:])
+        if code == b'DEL':
+            result = self.remove_url(fields[1]) #type:ignore
+        elif code == b'GET':
+            result = self.get_real_url(fields[1]) #type:ignore
+        elif code == b'ADD':
+            result = self.add_url(fields[1]) #type:ignore
+        elif code == b'HELLO':
+            result = self.server_hello(fields[1],fields[2])
+        else:
+            result = b'ERR~255'
         return result
     
-    def server_hello(self) -> bytes:
+    def server_hello(self,username,password) -> bytes:
         return b'ACK'
     
     def show_stats(self):
@@ -54,6 +68,10 @@ class Server(NetworkWrapper):
         
         return wrapper
     
+    
+    def cleanup(self):
+        self._sock.close()
+    
     @manage_urls
     def add_url(self, urls: dict[str, str], real_url: bytes) -> bytes:
         urls[self.generate_fake_url()] = real_url.decode()
@@ -61,7 +79,7 @@ class Server(NetworkWrapper):
     
     @manage_urls
     def remove_url(self, urls: dict[str, str], fake_url: bytes) -> bytes:
-        not_found_err_msg = (f"ERR~{list(self.func_table.values()).index(self.remove_url)}~0")
+        not_found_err_msg = (f"ERR~1~0")
         val = urls.pop(fake_url.decode(), not_found_err_msg)
         if "ERR" in val:
             to_return: bytes = val.encode()
@@ -71,9 +89,9 @@ class Server(NetworkWrapper):
     
     @manage_urls
     def get_real_url(self, urls: dict[str, str], fake_url: bytes) -> bytes:
-        not_found_err_msg = (f"ERR~{list(self.func_table.values()).index(self.get_real_url)}~0")
+        not_found_err_msg = (f"ERR~2~0")
         val = urls.get(fake_url.decode(), not_found_err_msg)
-        return val.encode()
+        return b'URL~' + val.encode()
     
     def generate_fake_url(self) -> str:
         tlds = ["com", "net", "org", "info", "biz"]
@@ -88,13 +106,7 @@ class Server(NetworkWrapper):
 
         return f"https://{domain}.{path}"
     
-    func_table: dict[bytes,Callable] = {
-        b"ADD": add_url,
-        b"DEL": remove_url,
-        b"GET": get_real_url,
-        b"HELLO": server_hello
-    }
 
-
-test = Server()
-test.send_by_size(b'')
+if __name__ == "__main__":
+    test = Server()
+    test.send_by_size(b'')

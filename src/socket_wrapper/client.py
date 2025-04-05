@@ -1,7 +1,9 @@
+import sys
+import os
 
-
-from .network_wrapper import NetworkWrapper
-from ...ui import app
+sys.path.append(os.path.abspath(os.path.join(__file__, "..", "..")))
+from socket_wrapper.network_wrapper import NetworkWrapper
+#from ...ui import app
 
 class Client(NetworkWrapper):
     def __init__(self, ip: str, port: int) -> None:
@@ -11,16 +13,16 @@ class Client(NetworkWrapper):
 
         self._sock.connect((self.__ip, self.__port))
     
-    def parse(self,from_server: bytes) -> bytes:
+    def parse(self,from_server: bytes):
         fields = from_server.split(b'~')
         code = fields[0]
         if code == b'ACK':
-            return b''
-        if code == b'STATS':
-            raise NotImplementedError
-        if code == b'URL':
-            app.display_url(fields[1])
-        if code == b'ERR':
+            pass # Nothing needs to happen
+        elif code == b'STATS':
+            self.display_stats(fields[1:])
+        elif code == b'URL':
+            self.display_url(fields[1])
+        elif code == b'ERR':
             # If received error, handle error will simply ask the user again for the input that got an error. 
             # Than parse it again.  
             server_response = self.handle_error(fields[1:])
@@ -34,14 +36,19 @@ class Client(NetworkWrapper):
         return f'HELLO~{username}~{password}'.encode()
 
     def start_gui(self) -> bytes:
+        print("\n###################")
         print("What do you want to do?")
         print(" 1 - add url")
         print(" 2 - remove url")
         print(" 3 - get url")
         print(" 4 - req info")
-        choise: str = input(" >")
+        print(" 9 - exit")
+        print("\n---------------------")
+        choice: str = input(" >>> ")
+        if choice == "9":
+            return b''
         funciton_list = [self.add_url,self.remove_url,self.get_real_url,self.req_info]
-        to_send = funciton_list[int(choise)]()
+        to_send = funciton_list[int(choice) - 1]()
         return to_send
     
     def handle_error(self, fields: list[bytes]) -> bytes:
@@ -79,13 +86,17 @@ class Client(NetworkWrapper):
         """
     
     
+    def cleanup(self):
+        self._sock.close()
+    
     def display_url(self, url):
         """
         Show user the url.
         """
         print(url)
 
-
+    def display_stats(self,*args):
+        raise NotImplementedError
     def add_url(self, err: str = "") -> bytes:
         # Input from user the url.
         # Then build and return the request.
