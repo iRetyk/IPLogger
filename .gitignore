@@ -1,4 +1,4 @@
 /src/__pycache__/
 /src/socket_wrapper/__pycache__
 /.vscode/
-/src/urls.json
+*.json
