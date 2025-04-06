@@ -13,11 +13,13 @@ class Users:
     def manage_users(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            users = load_users()
+            with Users.lock:
+                users = load_users()
             
             result = func(users, *args, **kwargs)
             
-            json.dump(users, open('users.json', 'w'))
+            with Users.lock:
+                json.dump(users, open('users.json', 'w'))
 
             return result
         
@@ -32,15 +34,15 @@ class Users:
     
     @staticmethod
     @manage_users
-    def check_sign_in(users,username, password,) -> str:
+    def check_sign_in(users,username, password,) -> bytes:
         with Users.lock:
             if not Users.does_user_exists(username): #type:ignore
-                to_send = "ERR~2~Username not found"
+                to_send = b"ERR~2~Username not found"
             elif not users[username][0] == password:
-                to_send = "ERR~2~wrong password"
+                to_send = b"ERR~2~wrong password"
             
             else:
-                to_send = "ack"
+                to_send = b"ACK"
         return to_send
 
     @staticmethod
@@ -53,21 +55,21 @@ class Users:
     
     @staticmethod
     @manage_users
-    def sign_up(users,username, password, cpassword,salt,code) -> str:
+    def sign_up(users,username: str, password :str, cpassword: str,salt: str,code: str) -> bytes:
         with Users.lock:
             
             #check for errors
             if Users.does_user_exists(username): #type:ignore
-                to_send = "ERR~1~username already exists"
+                to_send = b"ERR~1~username already exists"
             elif password != cpassword:
-                to_send = "err~1~passwords aren't identical"
+                to_send = b"ERR~1~passwords aren't identical"
             elif not is_valid(username):
-                to_send = "err~1~Please enter a valid email!"
+                to_send = b"ERR~1~Please enter a valid email!"
             
             #actually sign up
             else:
                 users[username] = password,salt,code
-                to_send = "ack"
+                to_send = b"ACK"
         
         
         return to_send
