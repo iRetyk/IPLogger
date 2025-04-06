@@ -35,7 +35,25 @@ class Client(NetworkWrapper):
     def client_hello(self,username,password) -> bytes:
         return f'HELLO~{username}~{password}'.encode()
 
-    def start_gui(self) -> bytes:
+    
+    def start_menu(self) -> bytes:
+        print("\n###################")
+        print("Do you want to:")
+        print(" 1 - sign up")
+        print(" 2 - login ")
+        print(" 9 - exit")
+        choice = input(" >>> ")
+        if choice == "9":
+            return b''
+        elif choice == "1":
+            return self.sign_up()
+        elif choice == "2":
+            return self.login()
+        else:
+            print("Unknown option")
+            return self.main_menu()
+    
+    def main_menu(self) -> bytes:
         print("\n###################")
         print("What do you want to do?")
         print(" 1 - add url")
@@ -47,8 +65,12 @@ class Client(NetworkWrapper):
         choice: str = input(" >>> ")
         if choice == "9":
             return b''
-        funciton_list = [self.add_url,self.remove_url,self.get_real_url,self.req_info]
-        to_send = funciton_list[int(choice) - 1]()
+        function_list = [self.add_url,self.remove_url,self.get_real_url,self.req_info]
+        try:
+            to_send = function_list[int(choice) - 1]()
+        except IndexError:
+            print("Unknown option")
+            to_send = self.main_menu()
         return to_send
     
     def handle_error(self, fields: list[bytes]) -> bytes:
@@ -57,17 +79,28 @@ class Client(NetworkWrapper):
         According to error code, call appropriate function, and repeat user input (GUI)
         This logic happens until an ERROR is no longer received.
         """
+        to_send : bytes = b''
         function_number, error_type = fields
         match int(function_number): 
             case 0: # add_url
                 pass
             
             case 1: # remove_url
-                self.remove_url(error_type.decode())
+                to_send = self.remove_url(error_type.decode())
             
             case 2: # get_real_url
-                self.get_real_url(error_type.decode())
+                to_send = self.get_real_url(error_type.decode())
+                
+            case 3: # sign up
+                to_send = self.sign_up(error_type.decode())
             
+            case 4:# sign in
+                to_send = self.login(error_type.decode())
+                
+            case _:
+                raise Exception()
+            
+        self.send_by_size(to_send)
         return self.recv_by_size()
         
         """
@@ -91,6 +124,7 @@ class Client(NetworkWrapper):
 
     def display_stats(self,*args):
         raise NotImplementedError
+    
     def add_url(self, err: str = "") -> bytes:
         # Input from user the url.
         # Then build and return the request.
@@ -98,6 +132,24 @@ class Client(NetworkWrapper):
         fake_url = input(" >")
         return f'ADD~{fake_url}'.encode()
 
+
+    def login(self,err:str = "") -> bytes:
+        # Input from user the username and password.
+        # Build and return the request.
+        username: str = input("Username: ")
+        password: str = input("Password: ")
+        return b'SIGN_IN~' + username.encode() + b'~' + password.encode()
+
+
+    def sign_up(self,err:str = "") -> bytes:
+        # Input from user username and password
+        # Build and return the request.
+        username: str = input("Username: ")
+        password: str = input("Password: ")
+        cpassword: str = input("Confirm password: ")
+        return b'SIGN_UP~' + username.encode() + b'~' + password.encode() + b'~' + cpassword.encode()
+    
+    
     def remove_url(self, err: str = "") -> bytes:
         # Input from user the url.
         # Build and return the request.

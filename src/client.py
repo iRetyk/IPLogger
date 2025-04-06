@@ -11,12 +11,14 @@ def main():
     ip,port = "127.0.0.1",12344
     client: Client = Client(ip,port)
     try :
-        username = input("Username: ")
-        password = input("Password: ")
-        client.send_by_size(client.client_hello(username,password))
-        server_hello = client.recv_by_size() #TODO logic.
+        client.send_by_size(client.start_menu())
+        from_server: bytes = client.recv_by_size()
+        client.parse(from_server) # Handle errors.
+        # Reaching this point will happen only when the first stage completed - received ack from server.
+        if from_server == b'ACK':
+            print("Action was successful")
         while True:
-            to_send = client.start_gui()
+            to_send = client.main_menu()
             client.send_by_size(to_send)
             from_server = client.recv_by_size()
             to_send = client.parse(from_server)

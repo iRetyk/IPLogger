@@ -34,12 +34,12 @@ class Users:
     
     @staticmethod
     @manage_users
-    def check_sign_in(users,username, password,) -> bytes:
+    def check_sign_in(users,username, password) -> bytes:
         with Users.lock:
             if not Users.does_user_exists(username): #type:ignore
-                to_send = b"ERR~2~Username not found"
+                to_send = b"ERR~4~Username not found"
             elif not users[username][0] == password:
-                to_send = b"ERR~2~wrong password"
+                to_send = b"ERR~4~wrong password"
             
             else:
                 to_send = b"ACK"
@@ -47,7 +47,7 @@ class Users:
 
     @staticmethod
     @manage_users
-    def get_salt(users,username) -> str:
+    def get_salt(users,username : str) -> str:
         try:
             return users[username][1]
         except:
@@ -55,34 +55,27 @@ class Users:
     
     @staticmethod
     @manage_users
-    def sign_up(users,username: str, password :str, cpassword: str,salt: str,code: str) -> bytes:
-        with Users.lock:
-            
-            #check for errors
-            if Users.does_user_exists(username): #type:ignore
-                to_send = b"ERR~1~username already exists"
-            elif password != cpassword:
-                to_send = b"ERR~1~passwords aren't identical"
-            elif not is_valid(username):
-                to_send = b"ERR~1~Please enter a valid email!"
-            
-            #actually sign up
-            else:
-                users[username] = password,salt,code
-                to_send = b"ACK"
+    def sign_up(users,username: str, password :str, cpassword: str,salt: str) -> bytes:
+        
+        #check for errors
+        if Users.does_user_exists(username): #type:ignore
+            to_send = b"ERR~3~username already exists"
+        elif password != cpassword:
+            to_send = b"ERR~3~passwords aren't identical"
+        elif not is_valid(username):
+            to_send = b"ERR~3~Please enter a valid email!"
+        
+        #actually sign up
+        else:
+            users[username] = password,salt
+            to_send = b"ACK"
         
         
         return to_send
 
     @staticmethod
-    @manage_users
-    def ack_user(users,username):
-        #remove the code from the database
-        with Users.lock:
-            users[username] = users[username][0],users[username][1]
-            return "ack"
-
-
+    def create_salt() -> str:
+        return os.urandom(4).hex()
 
 
     def clear(self):

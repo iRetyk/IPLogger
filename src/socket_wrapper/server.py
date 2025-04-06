@@ -11,7 +11,7 @@ from typing import Callable
 sys.path.append(os.path.abspath(os.path.join(__file__, "..", "..")))
 
 from socket_wrapper.network_wrapper import NetworkWrapper
-
+from users import Users
 
 
 class Server(NetworkWrapper):
@@ -39,6 +39,10 @@ class Server(NetworkWrapper):
             result = self.add_url(fields[1]) #type:ignore
         elif code == b'HELLO':
             result = self.server_hello(fields[1],fields[2])
+        elif code == b'SIGN_UP':
+            result = Users.sign_up(*[field.decode() for field in fields[1:]],Users.get_salt(fields[1].decode())) #type:ignore
+        elif code == b'SIGN_IN':
+            result = Users.check_sign_in(*[field.decode() for field in fields[1:]])
         else:
             result = b'ERR~255'
         return result
@@ -79,7 +83,7 @@ class Server(NetworkWrapper):
     
     @manage_urls
     def remove_url(self, urls: dict[str, str], fake_url: bytes) -> bytes:
-        not_found_err_msg = (f"ERR~1~0")
+        not_found_err_msg = (f"ERR~1~url not found")
         val = urls.pop(fake_url.decode(), not_found_err_msg)
         if "ERR" in val:
             to_return: bytes = val.encode()
@@ -89,7 +93,7 @@ class Server(NetworkWrapper):
     
     @manage_urls
     def get_real_url(self, urls: dict[str, str], fake_url: bytes) -> bytes:
-        not_found_err_msg = (f"ERR~2~0")
+        not_found_err_msg = (f"ERR~2~url not found")
         val = urls.get(fake_url.decode(), not_found_err_msg)
         return b'URL~' + val.encode()
     
