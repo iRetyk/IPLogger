@@ -102,15 +102,6 @@ class Client(NetworkWrapper):
             
         self.send_by_size(to_send)
         return self.recv_by_size()
-        
-        """
-            func_table: dict[bytes,Callable] = {
-        b"ADD": add_url,
-        b"DEL": remove_url,
-        b"GET": get_real_url,
-        b"HELLO": server_hello
-    }
-        """
     
     
     def cleanup(self):
