@@ -57,22 +57,16 @@ class Client(NetworkWrapper):
         According to error code, call appropriate function, and repeat user input (GUI)
         This logic happens until an ERROR is no longer received.
         """
-        function_number, error_code = fields
+        function_number, error_type = fields
         match int(function_number): 
             case 0: # add_url
                 pass
             
             case 1: # remove_url
-                
-                match int(error_code):
-                    case 0: # url not found
-                        self.remove_url()
+                self.remove_url(error_type.decode())
             
             case 2: # get_real_url
-                
-                match int(error_code):
-                    case 0: # url not found
-                        self.get_real_url()
+                self.get_real_url(error_type.decode())
             
         return self.recv_by_size()
         
