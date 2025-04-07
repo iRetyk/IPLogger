@@ -38,7 +38,7 @@ class Spoof():
     def spoof(self):
         if DEBUG:
             while True:
-                print("Sent packet.... (not really)")
+                print("Sent spoofing packet.... (not really)")
                 time.sleep(1)
         else:
             while True:

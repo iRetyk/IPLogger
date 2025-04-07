@@ -51,7 +51,7 @@ class Client(NetworkWrapper):
             return self.login()
         else:
             print("Unknown option")
-            return self.main_menu()
+            return self.start_menu()
     
     def main_menu(self) -> bytes:
         print("\n###################")

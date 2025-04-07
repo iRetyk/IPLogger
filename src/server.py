@@ -32,8 +32,8 @@ def stop_spoofing() -> None:
 
 def main():
 
-    host_ip, target_ip,router_ip = "0","0","0"
-    #start_spoofing(host_ip, target_ip,router_ip)
+    host_ip, target_ip,router_ip = "192.168.1.128","192.168.1.128","192.168.1.1"
+    start_spoofing(host_ip, target_ip,router_ip)
     
     server: Server = Server(12344)
     try:
@@ -46,12 +46,13 @@ def main():
             
             server.send_by_size(to_send)
         
-        #stop_spoofing()
+        
     except Exception as err:
         print(f'General error: {err}')
         print(traceback.format_exc())
     finally:
         server.cleanup()
+        stop_spoofing()
 
 
 if __name__ == "__main__":

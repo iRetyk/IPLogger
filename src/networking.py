@@ -1,4 +1,4 @@
-from scapy.all import DNS, IP, an# type:ignore
+from scapy.all import DNS, IP# type:ignore
 from scapy.layers.l2 import ARP,Ether
 from scapy.layers.inet import UDP,IP,sr1 #type :ignore
 from scapy.layers.dns import DNS,DNSQR,DNSRR
@@ -131,10 +131,10 @@ class Spoofer:
         return urls
 
 
-    def nslookup(self,domain) -> Packet: # type:ignore
+    def nslookup(self,domain) -> scapy.Packet: 
         dns_query = IP(dst="8.8.8.8") / UDP(dport=53) / DNS(qdcount=1, rd=1,qd = 0)/DNSQR(qname=domain)
         response_packet = sr1(dns_query,verbose=0)
-        return response_packet
+        return response_packet #type:ignore
         
         #### Maybe for future use.
         dnsrr_list = response_packet.an
@@ -158,10 +158,4 @@ class Spoofer:
         
 
 
-
-#### TEST:
-host_ip = "192.168.1.128"
-router_ip = "192.168.1.1"
-spoof = Spoofer("192.168.0.0",host_ip,router_ip)
-spoof.forward_to_router()
 
