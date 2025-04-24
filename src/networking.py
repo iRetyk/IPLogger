@@ -1,6 +1,6 @@
-from scapy.all import DNS, IP# type:ignore
+from scapy.all import DNS, IP,sr1# type:ignore
 from scapy.layers.l2 import ARP,Ether
-from scapy.layers.inet import UDP,IP,sr1 #type :ignore
+from scapy.layers.inet import UDP,IP #type :ignore
 from scapy.layers.dns import DNS,DNSQR,DNSRR
 
 import scapy.all as scapy
