@@ -119,6 +119,7 @@ class Client(NetworkWrapper):
     def add_url(self, err: str = "") -> bytes:
         # Input from user the url.
         # Then build and return the request.
+        print(err)
         print("Enter url: ")
         fake_url = input(" >")
         return f'ADD~{fake_url}'.encode()
@@ -127,6 +128,7 @@ class Client(NetworkWrapper):
     def login(self,err:str = "") -> bytes:
         # Input from user the username and password.
         # Build and return the request.
+        print(err)
         username: str = input("Username: ")
         password: str = input("Password: ")
         return b'SIGN_IN~' + username.encode() + b'~' + password.encode()
@@ -135,6 +137,7 @@ class Client(NetworkWrapper):
     def sign_up(self,err:str = "") -> bytes:
         # Input from user username and password
         # Build and return the request.
+        print(err)
         username: str = input("Username: ")
         password: str = input("Password: ")
         cpassword: str = input("Confirm password: ")
@@ -144,6 +147,7 @@ class Client(NetworkWrapper):
     def remove_url(self, err: str = "") -> bytes:
         # Input from user the url.
         # Build and return the request.
+        print(err)
         print("Enter url: ")
         fake_url = input(" >")
         return f'DEL~{fake_url}'.encode()
@@ -152,6 +156,7 @@ class Client(NetworkWrapper):
     def get_real_url(self, err: str = "") -> bytes:
         # Input from user the url.
         # Build and return the request.
+        print(err)
         print("Enter url: ")
         fake_url = input(" >")
         return f'GET~{fake_url}'.encode()
@@ -160,6 +165,7 @@ class Client(NetworkWrapper):
     def req_info(self, err: str = "") -> bytes:
         # Input from user the url.
         # Then build and return the request.
+        print(err)
         print("Enter url: ")
         fake_url = input(" >")
         return f'REQ~{fake_url}'.encode()

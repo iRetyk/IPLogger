@@ -5,8 +5,6 @@ from socket_wrapper import Client
 
 
 
-
-
 def main():
     ip,port = "127.0.0.1",12344
     client: Client = Client(ip,port)
