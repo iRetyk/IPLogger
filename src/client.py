@@ -1,4 +1,4 @@
-
+import sys
 import traceback
 
 from socket_wrapper import Client
@@ -11,7 +11,9 @@ def main():
     try :
         client.send_by_size(client.start_menu())
         from_server: bytes = client.recv_by_size()
-        client.parse(from_server) # Handle errors.
+        to_send = client.parse(from_server) # Handle errors.
+        if to_send == b'':
+            sys.exit()
         # Reaching this point will happen only when the first stage completed - received ack from server.
         if from_server == b'ACK':
             print("Action was successful")
@@ -20,6 +22,8 @@ def main():
             client.send_by_size(to_send)
             from_server = client.recv_by_size()
             to_send = client.parse(from_server)
+            if to_send == b'':
+                break
 
     except Exception as err:
         print(f'General error: {err}')

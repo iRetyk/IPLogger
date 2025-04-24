@@ -1,9 +1,12 @@
 import sys
 import os
-
+from pathlib import Path
 sys.path.append(os.path.abspath(os.path.join(__file__, "..", "..")))
 from socket_wrapper.network_wrapper import NetworkWrapper
 #from ...ui import app
+
+# Make cwd project/
+os.chdir(Path(__file__).resolve().parent.parent.parent)
 
 class Client(NetworkWrapper):
     def __init__(self, ip: str, port: int) -> None:
@@ -16,6 +19,8 @@ class Client(NetworkWrapper):
     def parse(self,from_server: bytes):
         fields = from_server.split(b'~')
         code = fields[0]
+        if code == b'':
+            return b''
         if code == b'ACK':
             pass # Nothing needs to happen
         elif code == b'STATS':

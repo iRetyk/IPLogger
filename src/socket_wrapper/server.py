@@ -13,6 +13,9 @@ sys.path.append(os.path.abspath(os.path.join(__file__, "..", "..")))
 from socket_wrapper.network_wrapper import NetworkWrapper
 from users import Users
 
+# Make cwd project/
+os.chdir(Path(__file__).resolve().parent.parent.parent)
+
 
 class Server(NetworkWrapper):
     urls_path = f"{Path(__file__).parent.parent}/urls.json"
