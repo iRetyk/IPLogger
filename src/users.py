@@ -35,14 +35,15 @@ class Users:
     @staticmethod
     @manage_users
     def check_sign_in(users,username, password) -> bytes:
-        with Users.lock:
-            if not Users.does_user_exists(username): #type:ignore
-                to_send = b"ERR~4~Username not found"
-            elif not users[username][0] == password:
-                to_send = b"ERR~4~wrong password"
-            
-            else:
-                to_send = b"ACK"
+        
+        # Check for errors
+        if not Users.does_user_exists(username): #type:ignore
+            to_send = b"ERR~4~Username not found"
+        elif not users[username][0] == password:
+            to_send = b"ERR~4~wrong password"
+        
+        else:
+            to_send = b"ACK"
         return to_send
 
     @staticmethod
