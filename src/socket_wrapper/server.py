@@ -26,7 +26,6 @@ class Server(NetworkWrapper):
 
         self.__ip = "127.0.0.1"
         self.__port = port
-
         self._sock.bind((self.__ip, self.__port))
         self._sock.listen(100)
         self._sock,addr = self._sock.accept()
@@ -43,7 +42,7 @@ class Server(NetworkWrapper):
         elif code == b'HELLO':
             result = self.server_hello(fields[1],fields[2])
         elif code == b'SIGN_UP':
-            result = Users.sign_up(*[field.decode() for field in fields[1:]],Users.get_salt(fields[1].decode())) #type:ignore
+            result = Users.sign_up(*[field.decode() for field in fields[1:]],Users.create_salt()) #type:ignore
         elif code == b'SIGN_IN':
             result = Users.check_sign_in(*[field.decode() for field in fields[1:]])
         else:

@@ -2,8 +2,7 @@ import json,threading,os,re
 
 import smtplib,ssl,random
 from functools import wraps
-from email.message import EmailMessage
-
+from hashlib import sha256
 
 
 class Users:
@@ -39,7 +38,7 @@ class Users:
         # Check for errors
         if not Users.does_user_exists(username): #type:ignore
             to_send = b"ERR~4~Username not found"
-        elif not users[username][0] == password:
+        elif not users[username][0] == Users._hash(password + Users.get_salt(username)): #type:ignore
             to_send = b"ERR~4~wrong password"
         
         else:
@@ -68,7 +67,7 @@ class Users:
         
         #actually sign up
         else:
-            users[username] = password,salt
+            users[username] = Users._hash(password + salt),salt
             to_send = b"ACK"
         
         
@@ -78,10 +77,15 @@ class Users:
     def create_salt() -> str:
         return os.urandom(4).hex()
 
+    @staticmethod
+    def _hash(to_hash: str) -> str:
+        return sha256(to_hash.encode()).hexdigest()
+
 
     def clear(self):
         os.remove("users.json")
     
+
 
 
 
