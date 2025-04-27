@@ -7,6 +7,7 @@ class NetworkWrapper:
     """
     def __init__(self) -> None:
         self._sock = socket.socket()
+        self._sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
     def recv_by_size(self) -> bytes:
         """Recv message from client, using size field to ensure getting all the message.
