@@ -6,7 +6,7 @@ from socket_wrapper import Client
 
 
 def main():
-    ip,port = "127.0.0.1",12344
+    ip,port = "127.0.0.1",1234
     client: Client = Client(ip,port)
     try :
         client.send_by_size(client.start_menu())

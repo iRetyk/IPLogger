@@ -39,7 +39,7 @@ def main():
     host_ip, target_ip,router_ip = "192.168.1.128","192.168.1.128","192.168.1.1"
     start_spoofing(host_ip, target_ip,router_ip)
     
-    server: Server = Server(12344)
+    server: Server = Server(1234)
     try:
         while True:
             

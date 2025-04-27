@@ -81,8 +81,9 @@ class Server(NetworkWrapper):
     
     @manage_urls
     def add_url(self, urls: dict[str, str], real_url: bytes) -> bytes:
-        urls[self.generate_fake_url()] = real_url.decode()
-        return b"ACK"
+        fake_url = self.generate_fake_url()
+        urls[fake_url] = real_url.decode()
+        return f"URL~{fake_url}".encode()
     
     @manage_urls
     def remove_url(self, urls: dict[str, str], fake_url: bytes) -> bytes:
