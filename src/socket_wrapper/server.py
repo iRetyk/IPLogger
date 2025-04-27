@@ -3,6 +3,8 @@ import random
 import string
 import json
 import os
+import threading
+from socket import socket
 from pathlib import Path
 from functools import wraps
 from typing import Callable
@@ -26,9 +28,9 @@ class Server(NetworkWrapper):
 
         self.__ip = "127.0.0.1"
         self.__port = port
-        self._sock.bind((self.__ip, self.__port))
-        self._sock.listen(100)
-        self._sock,addr = self._sock.accept()
+        self._serv_sock.bind((self.__ip, self.__port))
+        self._serv_sock.listen(100)
+        self._sock,addr = self._serv_sock.accept()
     
     def parse(self, data: bytes) -> bytes:
         fields: list[bytes] = data.split(b"~")

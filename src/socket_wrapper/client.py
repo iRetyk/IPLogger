@@ -14,7 +14,7 @@ class Client(NetworkWrapper):
         self.__ip = ip
         self.__port = port
 
-        self._sock.connect((self.__ip, self.__port))
+        self._serv_sock.connect((self.__ip, self.__port))
     
     def parse(self,from_server: bytes):
         fields = from_server.split(b'~')
@@ -110,7 +110,7 @@ class Client(NetworkWrapper):
     
     
     def cleanup(self):
-        self._sock.close()
+        self._serv_sock.close()
     
     def display_url(self, url):
         """
