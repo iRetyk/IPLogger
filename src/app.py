@@ -66,10 +66,15 @@ def signup():
     return render_template('signup.html')
 
 
-@app.route('/main_menu')
-def main_menu():
+@app.route('/start_menu')
+def start_menu():
     # Display the main menu where users can add/remove URLs or request info.
     return render_template('menu.html')
+
+
+@app.route('/main_menu')
+def main_menu():
+    return render_template('main_menu.html')
 
 
 @app.route('/add_url', methods=['GET', 'POST'])
