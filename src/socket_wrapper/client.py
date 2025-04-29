@@ -16,6 +16,13 @@ class Client(NetworkWrapper):
 
         self._serv_sock.connect((self.__ip, self.__port))
     
+    
+    def recv_by_size(self) -> bytes: #type:ignore
+        return super().recv_by_size(self._serv_sock)
+    
+    def send_by_size(self, to_send: bytes): #type:ignore
+        return super().send_by_size(to_send, self._serv_sock)
+    
     def parse(self, from_server: bytes):
         fields = from_server.split(b'~')
         code = fields[0]

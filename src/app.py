@@ -9,6 +9,7 @@ ip,port = "127.0.0.1",12344
 
 client = Client(ip,port)  # Connects to your socket server
 client.send_by_size(client.client_hello())
+client.recv_by_size()
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -168,4 +169,4 @@ def req_info():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, use_reloader=False)
