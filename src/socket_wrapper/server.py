@@ -32,6 +32,12 @@ class Server(NetworkWrapper):
         self._serv_sock.listen(100)
         self._sock,addr = self._serv_sock.accept()
     
+    def recv_by_size(self) -> bytes: #type:ignore
+        return super().recv_by_size(self._sock)
+    
+    def send_by_size(self, to_send: bytes): #type:ignore
+        return super().send_by_size(to_send, self._sock)
+
     def parse(self, data: bytes) -> bytes:
         fields: list[bytes] = data.split(b"~")
         code: bytes = fields[0]
@@ -42,7 +48,7 @@ class Server(NetworkWrapper):
         elif code == b'ADD':
             result = self.add_url(fields[1]) #type:ignore
         elif code == b'HELLO':
-            result = self.server_hello(fields[1],fields[2])
+            result = self.server_hello()
         elif code == b'SIGN_UP':
             result = Users.sign_up(*[field.decode() for field in fields[1:]],Users.create_salt()) #type:ignore
         elif code == b'SIGN_IN':
@@ -51,7 +57,7 @@ class Server(NetworkWrapper):
             result = b'ERR~255'
         return result
     
-    def server_hello(self,username,password) -> bytes:
+    def server_hello(self) -> bytes:
         return b'ACK'
     
     def show_stats(self):

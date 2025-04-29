@@ -45,6 +45,8 @@ def main():
 
     try:
         server: Server = Server(12344)
+        print("Binded server, waiting......")
+        
         while True:
             
             from_client: bytes  = server.recv_by_size()

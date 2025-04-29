@@ -16,20 +16,20 @@ class Client(NetworkWrapper):
 
         self._serv_sock.connect((self.__ip, self.__port))
     
-    def parse(self,from_server: bytes):
+    def parse(self, from_server: bytes):
         fields = from_server.split(b'~')
         code = fields[0]
+        
         if code == b'':
             return b''
-        if code == b'ACK':
-            pass # Nothing needs to happen
+        elif code == b'ACK':
+            return b''
         elif code == b'STATS':
             self.display_stats(fields[1:])
         elif code == b'URL':
-            self.display_url(fields[1])
+            self.display_url(fields[1].decode())
         elif code == b'ERR':
-            # If received error, handle error will simply ask the user again for the input that got an error. 
-            # Than parse it again.  
+            # If received error, handle_error will ask user again for input
             server_response = self.handle_error(fields[1:])
             return self.parse(server_response)
         else:
@@ -37,47 +37,11 @@ class Client(NetworkWrapper):
     
     
 
-    def client_hello(self,username,password) -> bytes:
-        return f'HELLO~{username}~{password}'.encode()
+    def client_hello(self) -> bytes:
+        return b'HELLO'
 
     
-    def start_menu(self) -> bytes:
-        print("\n###################")
-        print("Do you want to:")
-        print(" 1 - sign up")
-        print(" 2 - login ")
-        print(" 9 - exit")
-        choice = input(" >>> ")
-        if choice == "9":
-            return b''
-        elif choice == "1":
-            return self.sign_up()
-        elif choice == "2":
-            return self.login()
-        else:
-            print("Unknown option")
-            return self.start_menu()
-    
-    def main_menu(self) -> bytes:
-        print("\n###################")
-        print("What do you want to do?")
-        print(" 1 - add url")
-        print(" 2 - remove url")
-        print(" 3 - get url")
-        print(" 4 - req info")
-        print(" 9 - exit")
-        print("\n---------------------")
-        choice: str = input(" >>> ")
-        if choice == "9":
-            return b''
-        function_list = [self.add_url,self.remove_url,self.get_real_url,self.req_info]
-        try:
-            to_send = function_list[int(choice) - 1]()
-        except IndexError:
-            print("Unknown option")
-            to_send = self.main_menu()
-        return to_send
-    
+
     def handle_error(self, fields: list[bytes]) -> bytes:
         """
         If received error, this function will be called. 
@@ -97,10 +61,10 @@ class Client(NetworkWrapper):
                 to_send = self.get_real_url(error_type.decode())
                 
             case 3: # sign up
-                to_send = self.sign_up(error_type.decode())
+                to_send = self.sign_up("","","",err=error_type.decode())
             
             case 4:# sign in
-                to_send = self.login(error_type.decode())
+                to_send = self.login("","",err=error_type.decode())
                 
             case _:
                 raise Exception()
@@ -112,65 +76,34 @@ class Client(NetworkWrapper):
     def cleanup(self):
         self._serv_sock.close()
     
-    def display_url(self, url):
-        """
-        Show user the url.
-        """
-        print(url)
+    def sign_up(self, username: str, password: str, cpassword: str, err: str = "") -> bytes:
+        # Return formatted request for sign-up
+        return f"SIGN_UP~{username}~{password}~{cpassword}".encode()
 
-    def display_stats(self,*args):
+    def login(self, username: str, password: str, err: str = "") -> bytes:
+        # Return formatted request for login
+        return f"SIGN_IN~{username}~{password}".encode()
+
+    def add_url(self, fake_url: str, err: str = "") -> bytes:
+        # Return formatted request to add a URL
+        return f"ADD~{fake_url}".encode()
+
+    def remove_url(self, fake_url: str, err: str = "") -> bytes:
+        # Return formatted request to remove a URL
+        return f"DEL~{fake_url}".encode()
+
+    def get_real_url(self, fake_url: str, err: str = "") -> bytes:
+        # Return formatted request to get the real URL
+        return f"GET~{fake_url}".encode()
+
+    def req_info(self, fake_url: str, err: str = "") -> bytes:
+        # Return formatted request to fetch request info
+        return f"REQ~{fake_url}".encode()
+
+    def display_url(self, url: str):
+        # Simple passthrough for Flask template rendering
+        return url
+
+    def display_stats(self, *args):
+        # Not implemented yet
         raise NotImplementedError
-    
-    def add_url(self, err: str = "") -> bytes:
-        # Input from user the url.
-        # Then build and return the request.
-        print(err)
-        print("Enter url: ")
-        fake_url = input(" >")
-        return f'ADD~{fake_url}'.encode()
-
-
-    def login(self,err:str = "") -> bytes:
-        # Input from user the username and password.
-        # Build and return the request.
-        print(err)
-        username: str = input("Username: ")
-        password: str = input("Password: ")
-        return b'SIGN_IN~' + username.encode() + b'~' + password.encode()
-
-
-    def sign_up(self,err:str = "") -> bytes:
-        # Input from user username and password
-        # Build and return the request.
-        print(err)
-        username: str = input("Username: ")
-        password: str = input("Password: ")
-        cpassword: str = input("Confirm password: ")
-        return b'SIGN_UP~' + username.encode() + b'~' + password.encode() + b'~' + cpassword.encode()
-    
-    
-    def remove_url(self, err: str = "") -> bytes:
-        # Input from user the url.
-        # Build and return the request.
-        print(err)
-        print("Enter url: ")
-        fake_url = input(" >")
-        return f'DEL~{fake_url}'.encode()
-
-
-    def get_real_url(self, err: str = "") -> bytes:
-        # Input from user the url.
-        # Build and return the request.
-        print(err)
-        print("Enter url: ")
-        fake_url = input(" >")
-        return f'GET~{fake_url}'.encode()
-
-
-    def req_info(self, err: str = "") -> bytes:
-        # Input from user the url.
-        # Then build and return the request.
-        print(err)
-        print("Enter url: ")
-        fake_url = input(" >")
-        return f'REQ~{fake_url}'.encode()
