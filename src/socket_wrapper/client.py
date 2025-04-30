@@ -23,33 +23,32 @@ class Client(NetworkWrapper):
     def send_by_size(self, to_send: bytes): #type:ignore
         return super().send_by_size(to_send, self._serv_sock)
     
-    def parse(self, from_server: bytes) -> bytes:
+    def parse(self, from_server: bytes) -> tuple[str,str]:
         """Parse server response
 
         Args:
             from_server (bytes): message from server
 
         Raises:
-            Exception: if uknown message
+            Exception: if unknown message type
 
         Returns:
-            bytes: message from server.
+            string: message to show user.
+            string: message type  - error, success
         """
         fields = from_server.split(b'~')
         code = fields[0]
         
         if code == b'':
-            return b''
+            return "",""
         elif code == b'ACK':
-            return b''
+            return "Action was done successfully","success"
         elif code == b'STATS':
-            self.display_stats(fields[1:])
-            return b''
+            return "NOT IMPLEMENTED","" #TODO 
         elif code == b'URL':
-            self.display_url(fields[1].decode())
-            return b''
+            return f"Url - {fields[1].decode()}","success"
         elif code == b'ERR':
-            return from_server
+            return f"Action failed - {fields[2].decode()}","error"
         else:
             raise Exception("Unknown code")
     
