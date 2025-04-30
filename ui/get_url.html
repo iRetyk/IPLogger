@@ -3,3 +3,13 @@
   Enter URL: <input name="url"><br>
   <input type="submit" value="Submit">
 </form>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div>
+      {% for category, message in messages %}
+        <div class="flash {{ category }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}

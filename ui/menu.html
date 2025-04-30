@@ -1,3 +1,13 @@
 <h1>Welcome</h1>
 <a href="{{ url_for('signup') }}">Sign up</a><br>
 <a href="{{ url_for('login') }}">Log in</a>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div>
+      {% for category, message in messages %}
+        <div class="flash {{ category }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
