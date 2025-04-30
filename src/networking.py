@@ -3,6 +3,7 @@ from scapy.layers.l2 import ARP,Ether
 from scapy.layers.inet import UDP,IP #type :ignore
 from scapy.layers.dns import DNS,DNSQR,DNSRR
 
+from .data.data_helper import record_entry
 import scapy.all as scapy
 
 import json
@@ -79,7 +80,7 @@ class Spoofer:
             urls: dict[str,str] = self.get_urls()
             if domain in urls.keys():
                 response_packet = self.nslookup(urls[domain])
-                self.record_entry(domain,packet)
+                record_entry(domain,self.build_dict_from_packet(response_packet))
             else:
                 response_packet = self.nslookup(domain)
                 
@@ -97,18 +98,7 @@ class Spoofer:
         # Capture all packets sent from the target, and not meant for host. because of the ARP spoofing, this packets are meant to be sent to the router.
         # Dump all corresponding packets into process_packet to handle.
 
-    
-    def record_entry(self,fake_url,packet):
-        """
-        register connection to fake website. note the IP, and such.
-        """
-        with open("data.json", 'r') as f:
-            data: dict[str,list[dict]] = json.load(f)
-        
-        data[fake_url].append(self.build_dict_from_packet(packet))
-        
-        with open("data.json" ,'r') as f:
-            json.dump(data,f)
+
     
     
     def build_dict_from_packet(self,packet) -> dict:

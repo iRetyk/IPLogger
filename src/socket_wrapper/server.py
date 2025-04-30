@@ -3,7 +3,7 @@ import random
 import string
 import json
 import os
-import threading
+import pickle
 from socket import socket
 from pathlib import Path
 from functools import wraps
@@ -14,6 +14,7 @@ sys.path.append(os.path.abspath(os.path.join(__file__, "..", "..")))
 
 from socket_wrapper.network_wrapper import NetworkWrapper
 from users import Users
+from ..data.data_helper import fetch_stats
 
 # Make cwd project/
 os.chdir(Path(__file__).resolve().parent.parent.parent)
@@ -49,6 +50,8 @@ class Server(NetworkWrapper):
             result = self.add_url(fields[1]) #type:ignore
         elif code == b'HELLO':
             result = self.server_hello()
+        elif code == b'REQ':
+            result = self.show_stats(fields[1])
         elif code == b'SIGN_UP':
             result = Users.sign_up(*[field.decode() for field in fields[1:]],Users.create_salt()) #type:ignore
         elif code == b'SIGN_IN':
@@ -60,8 +63,8 @@ class Server(NetworkWrapper):
     def server_hello(self) -> bytes:
         return b'ACK'
     
-    def show_stats(self):
-        pass
+    def show_stats(self,fake_url: bytes):
+        return pickle.dumps(fetch_stats(fake_url.decode()))
     
     @staticmethod
     def manage_urls(func):
