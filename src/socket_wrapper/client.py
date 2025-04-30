@@ -23,7 +23,18 @@ class Client(NetworkWrapper):
     def send_by_size(self, to_send: bytes): #type:ignore
         return super().send_by_size(to_send, self._serv_sock)
     
-    def parse(self, from_server: bytes):
+    def parse(self, from_server: bytes) -> bytes:
+        """Parse server response
+
+        Args:
+            from_server (bytes): message from server
+
+        Raises:
+            Exception: if uknown message
+
+        Returns:
+            bytes: message from server.
+        """
         fields = from_server.split(b'~')
         code = fields[0]
         
@@ -33,12 +44,12 @@ class Client(NetworkWrapper):
             return b''
         elif code == b'STATS':
             self.display_stats(fields[1:])
+            return b''
         elif code == b'URL':
             self.display_url(fields[1].decode())
+            return b''
         elif code == b'ERR':
-            # If received error, handle_error will ask user again for input
-            server_response = self.handle_error(fields[1:])
-            return self.parse(server_response)
+            return from_server
         else:
             raise Exception("Unknown code")
     
@@ -47,37 +58,6 @@ class Client(NetworkWrapper):
     def client_hello(self) -> bytes:
         return b'HELLO'
 
-    
-
-    def handle_error(self, fields: list[bytes]) -> bytes:
-        """
-        If received error, this function will be called. 
-        According to error code, call appropriate function, and repeat user input (GUI)
-        This logic happens until an ERROR is no longer received.
-        """
-        to_send : bytes = b''
-        function_number, error_type = fields
-        match int(function_number): 
-            case 0: # add_url
-                pass
-            
-            case 1: # remove_url
-                to_send = self.remove_url(error_type.decode())
-            
-            case 2: # get_real_url
-                to_send = self.get_real_url(error_type.decode())
-                
-            case 3: # sign up
-                to_send = self.sign_up("","","",err=error_type.decode())
-            
-            case 4:# sign in
-                to_send = self.login("","",err=error_type.decode())
-                
-            case _:
-                raise Exception()
-            
-        self.send_by_size(to_send)
-        return self.recv_by_size()
     
     
     def cleanup(self):
