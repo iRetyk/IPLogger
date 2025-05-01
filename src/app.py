@@ -66,7 +66,10 @@ class ClientManager:
             to_flash,category = self.client.parse(response)
 
             flash(to_flash,category)
-            return redirect(url_for('login'))
+            if category.lower() == "error":
+                return redirect(url_for('login'))
+            else:
+                return redirect(url_for("main_menu"))
 
         return render_template('login.html')
 
@@ -159,10 +162,6 @@ class ClientManager:
             self.client.send_by_size(data)
 
             # Receive and parse the server response
-            response = self.client.recv_by_size()
-            parsed_response = self.client.parse(response)
-
-            # Handle server response
             response = self.client.recv_by_size()
             if response == b'': # Server disconnected
                 self.exit()
