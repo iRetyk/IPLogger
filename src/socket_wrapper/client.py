@@ -62,7 +62,7 @@ class Client(NetworkWrapper):
         for i,d in enumerate(data):
             st += f"Entry No. {i}\n"
             for k,v in d.items():
-                st += f"\t\t{k}:{v}\n"
+                st += f" - - - - - {k}:{v}\n"
             st += "\n"
         return st
 
