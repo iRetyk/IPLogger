@@ -37,8 +37,8 @@ class Client(NetworkWrapper):
         elif code == b'ACK':
             return "Action was done successfully","success"
         elif code == b'STATS':
-            data: dict = pickle.loads(fields[1])
-            return str(data),"success" #TODO 
+            data: list = pickle.loads(fields[1])
+            return self.format_data(data),"success" 
         elif code == b'URL':
             return f"Url - {fields[1].decode()}","success"
         elif code == b'ERR':
@@ -55,6 +55,18 @@ class Client(NetworkWrapper):
     
     def cleanup(self):
         self._serv_sock.close()
+    
+    
+    def format_data(self, data: list[dict]) -> str:
+        st = ""
+        for i,d in enumerate(data):
+            st += f"Entry No. {i}\n"
+            for k,v in d.items():
+                st += f"\t\t{k}:{v}\n"
+            st += "\n"
+        return st
+
+    
     
     def sign_up(self, username: str, password: str, cpassword: str, err: str = "") -> bytes:
         # Return formatted request for sign-up

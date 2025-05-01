@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, session,flash
+import jinja2,markupsafe
 import os,signal
 from socket_wrapper import Client 
 
@@ -30,6 +31,8 @@ class ClientManager:
         self.app.route('/remove_url', methods=['GET', 'POST'])(self.remove_url)
         self.app.route('/get_real_url', methods=['GET', 'POST'])(self.get_real_url)
         self.app.route('/req_info', methods=['GET', 'POST'])(self.req_info)
+        self.app.jinja_env.filters['nl2br'] = self._nl2br_filter
+        
     
     def exit(self):
         """Handle application exit"""
@@ -193,6 +196,14 @@ class ClientManager:
             return redirect(url_for('req_info'))
 
         return render_template('req_info.html')
+    
+    
+    @staticmethod
+    def _nl2br_filter(text):
+        if text:
+            return jinja2.utils.markupsafe.Markup(text.replace('\n', '<br>')) #type:ignore
+        return ""
+        
 
 
 if __name__ == '__main__':
