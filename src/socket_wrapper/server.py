@@ -14,11 +14,8 @@ sys.path.append(os.path.abspath(os.path.join(__file__, "..", "..")))
 
 from socket_wrapper.network_wrapper import NetworkWrapper
 from users import Users
-from ..data.data_helper import fetch_stats
 
-# Make cwd project/
-os.chdir(Path(__file__).resolve().parent.parent.parent)
-
+from data.data_helper import fetch_stats
 
 class Server(NetworkWrapper):
     urls_path = f"{Path(__file__).parent.parent}/urls.json"

@@ -3,7 +3,7 @@ from scapy.layers.l2 import ARP,Ether
 from scapy.layers.inet import UDP,IP #type :ignore
 from scapy.layers.dns import DNS,DNSQR,DNSRR
 
-from .data.data_helper import record_entry
+from data.data_helper import record_entry
 import scapy.all as scapy
 
 import json
