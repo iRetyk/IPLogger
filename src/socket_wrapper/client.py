@@ -1,12 +1,7 @@
 import sys
 import os
 from pathlib import Path
-sys.path.append(os.path.abspath(os.path.join(__file__, "..", "..")))
 from socket_wrapper.network_wrapper import NetworkWrapper
-#from ...ui import app
-
-# Make cwd project/
-os.chdir(Path(__file__).resolve().parent.parent.parent)
 
 class Client(NetworkWrapper):
     def __init__(self, ip: str, port: int) -> None:

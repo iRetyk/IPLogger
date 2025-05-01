@@ -9,8 +9,6 @@ from socket_wrapper import Server
 
 spoof_process: subprocess.Popen
 
-# Make cwd project/
-os.chdir(Path(__file__).resolve().parent.parent)
 
 def start_spoofing(host_ip: str,target_ip: str,router_ip: str) -> None:
     """
