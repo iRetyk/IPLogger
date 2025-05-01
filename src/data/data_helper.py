@@ -1,12 +1,15 @@
 import json
+import os
+
+data_file_path = "/Users/Idan/project/src/data/data.json"
 
 def get_data() -> dict[str,list[dict]]:
-    with open("data.json", 'r') as f:
-        return json.load(f)
+    with open(data_file_path, 'r') as f:
+        return json.loads(f.read())
 
 
 def save_data(data : dict[str,list[dict]]):
-    with open("data.json" ,'r') as f:
+    with open(data_file_path ,'w') as f:
         json.dump(data,f)
 
 
