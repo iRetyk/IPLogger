@@ -38,7 +38,9 @@ class Client(NetworkWrapper):
             return "Action was done successfully","success"
         elif code == b'STATS':
             data: list = pickle.loads(fields[1])
-            return self.format_data(data),"success" 
+            fake_url = fields[2]
+            real_url = fields[3]
+            return self.format_data(data,fake_url.decode(),real_url.decode()),"success" 
         elif code == b'URL':
             return f"Url - {fields[1].decode()}","success"
         elif code == b'ERR':
@@ -57,8 +59,8 @@ class Client(NetworkWrapper):
         self._serv_sock.close()
     
     
-    def format_data(self, data: list[dict]) -> str:
-        st = ""
+    def format_data(self, data: list[dict],fake: str, real: str) -> str:
+        st = "Entries recorded for " + fake + f"({real})\n"
         for i,d in enumerate(data):
             st += f"Entry No. {i}\n"
             for k,v in d.items():
