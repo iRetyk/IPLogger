@@ -21,7 +21,7 @@ class NetworkWrapper:
         
         msg_size: bytes = b""
         while not b"~" in msg_size:
-            msg_size += sock.recv(4)
+            msg_size += sock.recv(1)
             if not msg_size:  # msg_size is empty - Client disconnected
                 return b""  # Return empty string to indicate the issue
 
@@ -32,7 +32,7 @@ class NetworkWrapper:
             msg += sock.recv(128)
         
         # log
-        print("Received >>>" + msg.decode())
+        print("Received >>>" + str(msg))
         return msg
     
     
@@ -41,6 +41,6 @@ class NetworkWrapper:
         if sock is None:
             sock = self._serv_sock
         
-        to_send = f'{len(to_send)}~{to_send.decode()}'.encode()
-        print(" Sending>>>>> " + to_send.decode())
+        to_send = str(len(to_send)).encode() + b'~' + to_send
+        print(" Sending>>>>> " + str(to_send)[2:-1])
         sock.send(to_send)
