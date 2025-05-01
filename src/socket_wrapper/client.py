@@ -1,6 +1,3 @@
-import sys
-import os
-from pathlib import Path
 from socket_wrapper.network_wrapper import NetworkWrapper
 
 class Client(NetworkWrapper):
@@ -65,9 +62,9 @@ class Client(NetworkWrapper):
         # Return formatted request for login
         return f"SIGN_IN~{username}~{password}".encode()
 
-    def add_url(self, fake_url: str, err: str = "") -> bytes:
+    def add_url(self, url: str, err: str = "") -> bytes:
         # Return formatted request to add a URL
-        return f"ADD~{fake_url}".encode()
+        return f"ADD~{url}".encode()
 
     def remove_url(self, fake_url: str, err: str = "") -> bytes:
         # Return formatted request to remove a URL
