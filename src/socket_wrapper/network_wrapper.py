@@ -32,7 +32,7 @@ class NetworkWrapper:
             msg += sock.recv(128)
         
         # log
-        print("Received >>>" + str(msg))
+        print("Received >>>" + str(msg)[2:-1])
         return msg
     
     
