@@ -1,3 +1,4 @@
+import pickle
 from socket_wrapper.network_wrapper import NetworkWrapper
 
 class Client(NetworkWrapper):
@@ -36,7 +37,8 @@ class Client(NetworkWrapper):
         elif code == b'ACK':
             return "Action was done successfully","success"
         elif code == b'STATS':
-            return "NOT IMPLEMENTED","" #TODO 
+            data: dict = pickle.loads(fields[1])
+            return str(data),"success" #TODO 
         elif code == b'URL':
             return f"Url - {fields[1].decode()}","success"
         elif code == b'ERR':
