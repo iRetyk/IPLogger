@@ -80,11 +80,3 @@ class Client(NetworkWrapper):
     def req_info(self, fake_url: str, err: str = "") -> bytes:
         # Return formatted request to fetch request info
         return f"REQ~{fake_url}".encode()
-
-    def display_url(self, url: str):
-        # Simple passthrough for Flask template rendering
-        return url
-
-    def display_stats(self, *args):
-        # Not implemented yet
-        raise NotImplementedError
