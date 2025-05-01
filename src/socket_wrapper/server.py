@@ -61,7 +61,7 @@ class Server(NetworkWrapper):
         return b'ACK'
     
     def show_stats(self,fake_url: bytes):
-        return b'STATS~' + pickle.dumps(fetch_stats(fake_url.decode())) + b'~' + fake_url + b'~' + self.retrieve_url(fake_url).encode() #type:ignore
+        return b'STATS~' + pickle.dumps(fetch_stats(fake_url.decode())) + b'~' + fake_url + b'~' + self.retrieve_url(fake_url).encode() + b'\n\n' #type:ignore
     
     @staticmethod
     def manage_urls(func):
