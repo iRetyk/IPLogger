@@ -5,7 +5,7 @@ and than kills it, when shutting down.
 """
 
 
-DEBUG = True
+DEBUG = False
 
 import threading
 import sys
@@ -42,7 +42,7 @@ class Spoof():
                 time.sleep(1)
         else:
             while True:
-                self.__spoof_obj.spoof()
+                self.__spoof_obj.send_spoofed_packet()
                 time.sleep(random.random()/10) # wait a random number between 0-0.1
                 # The time.sleep has 2 jobs - 
                 #   first, make the spoof harder to notice.

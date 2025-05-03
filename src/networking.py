@@ -16,7 +16,7 @@ class Spoofer:
         self.__target_ip = target_ip
         self.__router_ip = router_ip
 
-    def spoof(self): # Main
+    def send_spoofed_packet(self): # Main
         """sending spoofed packet.
         """
         # getting the MAC of the target
