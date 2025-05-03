@@ -64,7 +64,7 @@ def main():
     
     spoof_t.start()
     MITM_t.start()
-    # Run in the backgroud.
+    # Run in the background.
     
 
 if __name__ == "__main__":
