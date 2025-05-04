@@ -1,0 +1,35 @@
+from http.server import HTTPServer, BaseHTTPRequestHandler
+from urllib.parse import urlparse, parse_qs
+
+class RedirectHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        # Parse the URL and query parameters
+        parsed_path = urlparse(self.path)
+        params = parse_qs(parsed_path.query)
+
+        # Get the website parameter, default to google if not provided
+        website = params.get('website', ['https://www.google.com'])[0]
+
+        # Add https:// if not present
+        if not website.startswith('http://') and not website.startswith('https://'):
+            website = 'https://' + website
+
+        print(f"Redirecting to: {website}")
+
+        # Send redirect response
+        self.send_response(302)
+        self.send_header('Location', website)
+        self.end_headers()
+
+    def do_POST(self):
+        # Handle POST requests the same way
+        self.do_GET()
+
+def run_server(port=8001):
+    server_address = ('', port)
+    httpd = HTTPServer(server_address, RedirectHandler)
+    print(f"Server running on port {port}...")
+    httpd.serve_forever()
+
+if __name__ == '__main__':
+    run_server()

