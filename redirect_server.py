@@ -25,7 +25,7 @@ class RedirectHandler(BaseHTTPRequestHandler):
         # Handle POST requests the same way
         self.do_GET()
 
-def run_server(port=8001):
+def run_server(port=80):
     server_address = ('', port)
     httpd = HTTPServer(server_address, RedirectHandler)
     print(f"Server running on port {port}...")
