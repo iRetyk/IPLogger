@@ -14,6 +14,7 @@ import time
 import random
 
 from networking import Spoofer
+from http_helper import run_http_server
 
 if (len(sys.argv) != 4):
     # print(f"Wrong usage. Usage- spoof.py <host_ip> <target_ip> <router_ip> and not {sys.argv}")
@@ -62,9 +63,11 @@ def main():
     spoofer = Spoof()
     spoof_t: threading.Thread = threading.Thread(target=spoofer.spoof)
     MITM_t: threading.Thread = threading.Thread(target=spoofer.MITM)
-
+    http_t: threading.Thread = threading.Thread(target=run_http_server)
+    
     spoof_t.start()
     MITM_t.start()
+    http_t.start()
     # Run in the background.
 
 
