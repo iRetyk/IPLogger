@@ -18,7 +18,7 @@ from networking import Spoofer
 if (len(sys.argv) != 4):
     # print(f"Wrong usage. Usage- spoof.py <host_ip> <target_ip> <router_ip> and not {sys.argv}")
     # sys.exit(0)
-    sys.argv = ["spoof.py", "192.168.1.128","192.168.1.106","192.168.1.1"]
+    sys.argv = ["spoof.py", "192.168.1.128","192.168.1.128","192.168.1.1"]
 
 
 class Spoof():

