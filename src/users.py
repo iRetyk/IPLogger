@@ -5,24 +5,26 @@ from functools import wraps
 from hashlib import sha256
 
 
+def manage_users(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        with Users.lock:
+            users = load_users()
+        
+        result = func(users, *args, **kwargs)
+        
+        with Users.lock:
+            json.dump(users, open('users.json', 'w'))
+
+        return result
+    
+    return wrapper
+
+
 class Users:
     lock = threading.Lock()
     
-    @staticmethod
-    def manage_users(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            with Users.lock:
-                users = load_users()
-            
-            result = func(users, *args, **kwargs)
-            
-            with Users.lock:
-                json.dump(users, open('users.json', 'w'))
-
-            return result
-        
-        return wrapper
+    
     
     
     

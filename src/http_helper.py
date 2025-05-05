@@ -1,6 +1,7 @@
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
 
+
 class RedirectHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         # Parse the URL and query parameters

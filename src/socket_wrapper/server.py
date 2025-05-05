@@ -17,6 +17,29 @@ from users import Users
 
 from data.data_helper import fetch_stats
 
+
+
+
+def manage_urls(func):
+    @wraps(func)
+    def wrapper(self, *args, **kwargs):
+        try:
+            with open(Server.urls_path, "r") as f:
+                urls: dict[str, str] = json.load(f)
+        except (json.JSONDecodeError, FileNotFoundError):
+            urls = {}
+        
+        result = func(self, urls, *args, **kwargs)
+        
+        with open(Server.urls_path, "w") as f:
+            json.dump(urls, f, indent=4)
+
+        return result
+    
+    return wrapper
+
+
+
 class Server(NetworkWrapper):
     urls_path = f"{Path(__file__).parent.parent}/urls.json"
 
@@ -63,7 +86,14 @@ class Server(NetworkWrapper):
     def show_stats(self,fake_url: bytes):
         return b'STATS~' + pickle.dumps(fetch_stats(fake_url.decode())) + b'~' + fake_url + b'~' + self.retrieve_url(fake_url).encode() + b'\n\n' #type:ignore
     
-    @staticmethod
+       
+    
+    def cleanup(self):
+        self._sock.close()
+    
+    @manage_urls
+    def retrieve_url(self,urls: dict[str,str],fake_url: bytes) -> str:
+        return urls.get(fake_url.decode(),"<real_url_here> (debug)")
     def manage_urls(func):
         @wraps(func)
         def wrapper(self, *args, **kwargs):
@@ -81,15 +111,6 @@ class Server(NetworkWrapper):
             return result
         
         return wrapper
-    
-    
-    def cleanup(self):
-        self._sock.close()
-    
-    @manage_urls
-    def retrieve_url(self,urls: dict[str,str],fake_url: bytes) -> str:
-        return urls.get(fake_url.decode(),"<real_url_here> (debug)")
-    
     
     @manage_urls
     def add_url(self, urls: dict[str, str], real_url: bytes) -> bytes:
