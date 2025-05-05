@@ -6,7 +6,7 @@ import os
 from pathlib import Path
 
 from socket_wrapper import Server
-from http_helper import run_http_server
+
 
 spoof_process: subprocess.Popen
 
@@ -39,12 +39,12 @@ def main():
     
     host_ip, target_ip,router_ip = "192.168.1.128","192.168.1.143","192.168.1.1"
     start_spoofing(host_ip, target_ip,router_ip)
-    run_http_server()
     
 
     try:
-        server: Server = Server(12344)
         print("Binded server, waiting......")
+        server: Server = Server(12344)
+        
         
         while True:
             

