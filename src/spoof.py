@@ -19,7 +19,7 @@ from http_helper import run_http_server
 if (len(sys.argv) != 4):
     # print(f"Wrong usage. Usage- spoof.py <host_ip> <target_ip> <router_ip> and not {sys.argv}")
     # sys.exit(0)
-    sys.argv = ["spoof.py", "192.168.1.128","192.168.1.128","192.168.1.1"]
+    sys.argv = ["spoof.py", "172.17.170.103","172.17.170.103","172.17.160.1"]
 
 
 class Spoof():
@@ -65,9 +65,9 @@ def main():
     MITM_t: threading.Thread = threading.Thread(target=spoofer.MITM)
     http_t: threading.Thread = threading.Thread(target=run_http_server)
     
-    spoof_t.start()
+    #spoof_t.start()
     MITM_t.start()
-    http_t.start()
+    #http_t.start()
     # Run in the background.
 
 

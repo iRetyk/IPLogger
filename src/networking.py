@@ -93,7 +93,7 @@ class Spoofer:
             domain = packet[DNSQR].qname.decode().rstrip(".")
             if 'info' in domain:
                 pass
-            if domain == "www.techqng.com":
+            if domain == "www.google.com":
                 print(f"Intercepted DNS query for {domain}")
 
                 # Craft spoofed DNS response

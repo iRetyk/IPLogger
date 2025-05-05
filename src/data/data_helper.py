@@ -19,7 +19,7 @@ def record_entry(fake_url: str, packet_dict: dict):
     """
     data = get_data()
 
-    data[fake_url].append(packet_dict)
+    #data[fake_url].append(packet_dict)
 
     save_data(data)
 
