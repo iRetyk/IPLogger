@@ -8,7 +8,7 @@ class RedirectHandler(BaseHTTPRequestHandler):
         params = parse_qs(parsed_path.query)
 
         # Get the website parameter, default to google if not provided
-        website = params.get('website', ['https://www.google.com'])[0]
+        website = params.get('website', ['https://www.chess.com'])[0]
 
         # Add https:// if not present
         if not website.startswith('http://') and not website.startswith('https://'):
@@ -25,11 +25,13 @@ class RedirectHandler(BaseHTTPRequestHandler):
         # Handle POST requests the same way
         self.do_GET()
 
-def run_server(port=80):
+def run_http_server(port=80):
     server_address = ('', port)
     httpd = HTTPServer(server_address, RedirectHandler)
-    print(f"Server running on port {port}...")
+    
     httpd.serve_forever()
 
 if __name__ == '__main__':
-    run_server()
+    print("Debug...")
+    print(f"Server running on port {80}...")
+    run_http_server()
