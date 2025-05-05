@@ -60,7 +60,7 @@ class Client(NetworkWrapper):
     
     
     def format_data(self, data: list[dict],fake: str, real: str) -> str:
-        st = "Entries recorded for " + fake + f"({real})\n"
+        st = "Entries recorded for " + fake + f"({real})\n\n"
         for i,d in enumerate(data):
             st += f"Entry No. {i}\n"
             for k,v in d.items():

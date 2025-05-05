@@ -18,8 +18,11 @@ def record_entry(fake_url: str, packet_dict: dict):
     register connection to fake website. note the IP, and such.
     """
     data = get_data()
-
-    data[fake_url] =packet_dict
+    
+    if fake_url in data.keys():
+        data[fake_url].append(packet_dict)
+    else:
+        data[fake_url] = [packet_dict]
 
     save_data(data)
 

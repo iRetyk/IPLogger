@@ -38,7 +38,7 @@ def dns_spoof(pkt):
             record_entry(SPOOF_DOMAIN,build_dict_from_packet(pkt))
             
 def build_dict_from_packet(pkt) -> dict[str,str]:
-    return {"IP":pkt[IP].src,"Time":time.time()}
+    return {"IP":pkt[IP].src,"Time":time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())}
 
 
 # Sniff DNS packets

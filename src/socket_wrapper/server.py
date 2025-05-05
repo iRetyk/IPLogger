@@ -84,7 +84,7 @@ class Server(NetworkWrapper):
         return b'ACK'
     
     def show_stats(self,fake_url: bytes):
-        return b'STATS~' + pickle.dumps(fetch_stats(fake_url.decode())) + b'~' + fake_url + b'~' + self.retrieve_url(fake_url).encode() + b'\n\n' #type:ignore
+        return b'STATS~' + pickle.dumps(fetch_stats(fake_url.decode())) + b'~' + fake_url + b'~' + self.retrieve_url(fake_url).encode()#type:ignore
     
        
     
@@ -94,6 +94,7 @@ class Server(NetworkWrapper):
     @manage_urls
     def retrieve_url(self,urls: dict[str,str],fake_url: bytes) -> str:
         return urls.get(fake_url.decode(),"<real_url_here> (debug)")
+    
     def manage_urls(func):
         @wraps(func)
         def wrapper(self, *args, **kwargs):
