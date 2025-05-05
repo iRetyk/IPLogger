@@ -1,16 +1,19 @@
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
+from cli_mapper import ClientMapper
 
 
+#MAPPER = ClientMapper()
 class RedirectHandler(BaseHTTPRequestHandler):
+    
     def do_GET(self):
-        # Parse the URL and query parameters
-        parsed_path = urlparse(self.path)
-        params = parse_qs(parsed_path.query)
 
         # Get the website parameter, default to google if not provided
-        website = params.get('website', ['https://www.chess.com'])[0]
-
+        #website = MAPPER.get_domain(self.client_address[0])
+        parsed_path = urlparse(self.path)
+        params = parse_qs(parsed_path.query)
+        
+        website = "www.chess.com"
         # Add https:// if not present
         if not website.startswith('http://') and not website.startswith('https://'):
             website = 'https://' + website

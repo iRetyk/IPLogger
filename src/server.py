@@ -11,6 +11,9 @@ from socket_wrapper import Server
 process_list: list[subprocess.Popen]
 
 
+
+            
+
 def start_processes(host_ip: str,target_ip: str,router_ip: str) -> None:
     """
     ths function will start all the proceses that run in the background.
