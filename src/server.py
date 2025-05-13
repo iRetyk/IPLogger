@@ -6,9 +6,9 @@ import os
 from pathlib import Path
 
 from socket_wrapper import Server
+from typing import List
 
-
-process_list = None
+process_list: List[subprocess.Popen]
 
 
 
