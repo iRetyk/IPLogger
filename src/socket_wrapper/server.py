@@ -7,7 +7,7 @@ import pickle
 from socket import socket
 from pathlib import Path
 from functools import wraps
-from typing import Callable
+from typing import Dict
 
 
 sys.path.append(os.path.abspath(os.path.join(__file__, "..", "..")))
@@ -89,24 +89,24 @@ class Server(NetworkWrapper):
             return b'ERR~4~Url Not Found'
         return b'STATS~' + pickle.dumps(d) + b'~' + fake_url + b'~' + self.retrieve_url(fake_url).encode()#type:ignore
     
-       
+    
     
     def cleanup(self):
         self._sock.close()
     
     @manage_urls
-    def retrieve_url(self,urls,fake_url: bytes) -> str:
+    def retrieve_url(self,urls: Dict[str,str],fake_url: bytes) -> str:
         return urls.get(fake_url.decode(),"<real_url_here> (debug)")
     
     
     @manage_urls
-    def add_url(self, urls, real_url: bytes) -> bytes:
+    def add_url(self, urls: Dict[str,str], real_url: bytes) -> bytes:
         fake_url = self.generate_fake_url()
         urls[fake_url] = real_url.decode()
         return f"URL~{fake_url}".encode()
     
     @manage_urls
-    def remove_url(self, urls, fake_url: bytes) -> bytes:
+    def remove_url(self, urls: Dict[str,str], fake_url: bytes) -> bytes:
         not_found_err_msg = (f"ERR~1~url not found")
         val = urls.pop(fake_url.decode(), not_found_err_msg)
         if "ERR" in val:
@@ -116,7 +116,7 @@ class Server(NetworkWrapper):
         return to_return
     
     @manage_urls
-    def get_real_url(self, urls, fake_url: bytes) -> bytes:
+    def get_real_url(self, urls: Dict[str,str], fake_url: bytes) -> bytes:
         not_found_err_msg = (f"ERR~2~url not found")
         val = urls.get(fake_url.decode(), not_found_err_msg)
         return b'URL~' + val.encode()
