@@ -3,12 +3,12 @@ import os
 
 data_file_path = os.path.join(os.path.dirname(__file__), "data.json")
 
-def get_data() -> dict[str,list[dict]]:
+def get_data():
     with open(data_file_path, 'r') as f:
         return json.loads(f.read())
 
 
-def save_data(data : dict[str,list[dict]]):
+def save_data(data):
     with open(data_file_path ,'w') as f:
         json.dump(data,f)
 
@@ -26,7 +26,10 @@ def record_entry(fake_url: str, packet_dict: dict):
 
     save_data(data)
 
-def fetch_stats(fake_url: str) -> list[dict]:
+def fetch_stats(fake_url: str):
     data = get_data()
-
-    return data[fake_url]
+    try:
+        to_return = data[fake_url]
+    except:
+        to_return = None
+    return to_return

@@ -8,7 +8,7 @@ from pathlib import Path
 from socket_wrapper import Server
 
 
-process_list: list[subprocess.Popen]
+process_list = None
 
 
 
@@ -23,8 +23,9 @@ def start_processes(host_ip: str,target_ip: str,router_ip: str) -> None:
     arp spoofing (not implemnted)
     """
     global process_list
-    http_process = subprocess.Popen(["/home/pablo/idan/dev/project/.venv/bin/python3","src/http_helper.py"])
-    dns_process = subprocess.Popen(["/home/pablo/idan/dev/project/.venv/bin/python3","src/dns_poison.py"])
+    
+    http_process = subprocess.Popen(["python","src/http_helper.py"])
+    dns_process = subprocess.Popen(["python","src/dns_poison.py"])
     #arp_process = subprocess.Popen(["python","arp_spoofer.py"])
     process_list = [http_process,dns_process]
 
@@ -48,7 +49,7 @@ def main():
 
 
     
-    host_ip, target_ip,router_ip = "192.168.1.128","192.168.1.143","192.168.1.1"
+    host_ip, target_ip,router_ip = "10.68.128.52","10.68.128.68","10.68.128.92"
     start_processes(host_ip, target_ip,router_ip)
     
 

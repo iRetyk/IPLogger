@@ -92,7 +92,7 @@ class Users:
 
 
 
-def load_users() -> dict:
+def load_users():
     try:
         with open('users.json', 'r') as file:
             return json.load(file)

@@ -16,7 +16,7 @@ class Client(NetworkWrapper):
     def send_by_size(self, to_send: bytes): #type:ignore
         return super().send_by_size(to_send, self._serv_sock)
     
-    def parse(self, from_server: bytes) -> tuple[str,str]:
+    def parse(self, from_server: bytes):
         """Parse server response
 
         Args:
@@ -59,7 +59,7 @@ class Client(NetworkWrapper):
         self._serv_sock.close()
     
     
-    def format_data(self, data: list[dict],fake: str, real: str) -> str:
+    def format_data(self, data,fake: str, real: str) -> str:
         st = "Entries recorded for " + fake + f"({real})\n\n"
         for i,d in enumerate(data):
             st += f"Entry No. {i}\n"

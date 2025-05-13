@@ -1,6 +1,10 @@
 from threading import Lock
 import json
 
+
+SERVER_IP = "10.68.121.52"
+
+
 class ClientMapper:
     def __init__(self):
         self.__map: dict[str,str] = {}
@@ -14,9 +18,12 @@ class ClientMapper:
     
     def get_domain(self,ip: str):
         self.get_map()
+        if ip == "127.0.0.1":
+             ip = SERVER_IP
         with self.__lock:
-            return self.__map.pop(ip)
+            to_return =  self.__map.pop(ip,"www.default.com")
         self.save_map()
+        return to_return
 
     def get_map(self):
         with self.__lock:

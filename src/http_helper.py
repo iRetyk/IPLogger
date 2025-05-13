@@ -3,17 +3,17 @@ from urllib.parse import urlparse, parse_qs
 from cli_mapper import ClientMapper
 
 
-#MAPPER = ClientMapper()
+MAPPER = ClientMapper()
 class RedirectHandler(BaseHTTPRequestHandler):
     
     def do_GET(self):
 
         # Get the website parameter, default to google if not provided
-        #website = MAPPER.get_domain(self.client_address[0])
+        website = MAPPER.get_domain(self.client_address[0])
         parsed_path = urlparse(self.path)
         params = parse_qs(parsed_path.query)
         
-        website = "www.chess.com"
+        
         # Add https:// if not present
         if not website.startswith('http://') and not website.startswith('https://'):
             website = 'https://' + website
@@ -36,6 +36,5 @@ def run_http_server(port=80):
     httpd.serve_forever()
 
 if __name__ == '__main__':
-    print("Debug...")
-    print(f"Server running on port {80}...")
+    print(f"HTTP server running on port {80}...")
     run_http_server()

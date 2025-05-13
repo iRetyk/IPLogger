@@ -25,7 +25,7 @@ def manage_urls(func):
     def wrapper(self, *args, **kwargs):
         try:
             with open(Server.urls_path, "r") as f:
-                urls: dict[str, str] = json.load(f)
+                urls = json.load(f)
         except (json.JSONDecodeError, FileNotFoundError):
             urls = {}
         
@@ -41,13 +41,13 @@ def manage_urls(func):
 
 
 class Server(NetworkWrapper):
-    urls_path = f"{Path(__file__).parent.parent}/urls.json"
+    urls_path = f"{Path(__file__).parent.parent.parent}/urls.json"
 
     def __init__(self, port: int = 0) -> None:
         super().__init__()
         self.__DEBUG = not bool(port)
 
-        self.__ip = "127.0.0.1"
+        self.__ip = "10.68.121.52"
         self.__port = port
         self._serv_sock.bind((self.__ip, self.__port))
         self._serv_sock.listen(100)
@@ -84,7 +84,10 @@ class Server(NetworkWrapper):
         return b'ACK'
     
     def show_stats(self,fake_url: bytes):
-        return b'STATS~' + pickle.dumps(fetch_stats(fake_url.decode())) + b'~' + fake_url + b'~' + self.retrieve_url(fake_url).encode()#type:ignore
+        d = fetch_stats(fake_url.decode())
+        if d is None: # url doesn't exist
+            return b'ERR~4~Url Not Found'
+        return b'STATS~' + pickle.dumps(d) + b'~' + fake_url + b'~' + self.retrieve_url(fake_url).encode()#type:ignore
     
        
     
@@ -92,7 +95,7 @@ class Server(NetworkWrapper):
         self._sock.close()
     
     @manage_urls
-    def retrieve_url(self,urls: dict[str,str],fake_url: bytes) -> str:
+    def retrieve_url(self,urls,fake_url: bytes) -> str:
         return urls.get(fake_url.decode(),"<real_url_here> (debug)")
     
     def manage_urls(func):
@@ -114,13 +117,13 @@ class Server(NetworkWrapper):
         return wrapper
     
     @manage_urls
-    def add_url(self, urls: dict[str, str], real_url: bytes) -> bytes:
+    def add_url(self, urls, real_url: bytes) -> bytes:
         fake_url = self.generate_fake_url()
         urls[fake_url] = real_url.decode()
         return f"URL~{fake_url}".encode()
     
     @manage_urls
-    def remove_url(self, urls: dict[str, str], fake_url: bytes) -> bytes:
+    def remove_url(self, urls, fake_url: bytes) -> bytes:
         not_found_err_msg = (f"ERR~1~url not found")
         val = urls.pop(fake_url.decode(), not_found_err_msg)
         if "ERR" in val:
@@ -130,7 +133,7 @@ class Server(NetworkWrapper):
         return to_return
     
     @manage_urls
-    def get_real_url(self, urls: dict[str, str], fake_url: bytes) -> bytes:
+    def get_real_url(self, urls, fake_url: bytes) -> bytes:
         not_found_err_msg = (f"ERR~2~url not found")
         val = urls.get(fake_url.decode(), not_found_err_msg)
         return b'URL~' + val.encode()
@@ -143,10 +146,10 @@ class Server(NetworkWrapper):
             random.choices(string.ascii_lowercase, k=length)
         )
 
-        domain = f"{random.choice(words)}{random_string(3)}.{random.choice(tlds)}"
+        domain = f"{random.choice(words)}{random_string(3)}{random.choice(tlds)}"
         path = f"/{random.choice(words)}{random_string(2)}/{random_string(4)}"
 
-        return f"https://{domain}.{path}"
+        return f"https://{domain}"
     
 
 if __name__ == "__main__":

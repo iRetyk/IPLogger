@@ -11,7 +11,7 @@ class ClientManager:
         self.app = Flask(__name__, template_folder=os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'ui')))
         self.app.secret_key = "your-secret-key"
         self._setup_routes()
-        ip,port = "127.0.0.1",12344
+        ip,port = "10.68.121.52",12344
 
         self.client = Client(ip,port)  # Connects to your socket server
         self.client.send_by_size(self.client.client_hello())
