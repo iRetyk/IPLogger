@@ -1,19 +1,22 @@
 import json
 import os
+from typing import Dict,List
 
 data_file_path = os.path.join(os.path.dirname(__file__), "data.json")
 
-def get_data():
+DataDict = Dict[str,List[Dict[str,str]]] # Type Alias
+
+def get_data() -> DataDict:
     with open(data_file_path, 'r') as f:
         return json.loads(f.read())
 
 
-def save_data(data):
+def save_data(data: DataDict):
     with open(data_file_path ,'w') as f:
         json.dump(data,f)
 
 
-def record_entry(fake_url: str, packet_dict: dict):
+def record_entry(fake_url: str, packet_dict: Dict[str,str]):
     """
     register connection to fake website. note the IP, and such.
     """
