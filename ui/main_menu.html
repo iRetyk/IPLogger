@@ -1,17 +1,148 @@
-<h2>Main Menu</h2>
-<ul>
-  <li><a href="{{ url_for('add_url') }}">Add URL</a></li>
-  <li><a href="{{ url_for('remove_url') }}">Remove URL</a></li>
-  <li><a href="{{ url_for('get_real_url') }}">Get Real URL</a></li>
-  <li><a href="{{ url_for('req_info') }}">Request Info</a></li>
-</ul>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Main Menu</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-{% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    <div>
-      {% for category, message in messages %}
-        <div class="flash {{ category }}">{{ message }}</div>
-      {% endfor %}
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            padding: 2rem;
+            background-color: #f5f5f5;
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background-color: white;
+            padding: 2.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 2rem;
+            text-align: center;
+            font-size: 2rem;
+        }
+
+        .menu-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .menu-item {
+            width: 100%;
+        }
+
+        .menu-link {
+            display: block;
+            text-decoration: none;
+            color: white;
+            background-color: #3498db;
+            padding: 1rem 1.5rem;
+            border-radius: 5px;
+            text-align: center;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .menu-link:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .menu-link.remove {
+            background-color: #e74c3c;
+        }
+
+        .menu-link.remove:hover {
+            background-color: #c0392b;
+        }
+
+        .menu-link.info {
+            background-color: #2ecc71;
+        }
+
+        .menu-link.info:hover {
+            background-color: #27ae60;
+        }
+
+        .flash {
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+        }
+
+        .flash.error {
+            background-color: #fee2e2;
+            border: 1px solid #ef4444;
+            color: #991b1b;
+        }
+
+        .flash.success {
+            background-color: #dcfce7;
+            border: 1px solid #22c55e;
+            color: #166534;
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 1rem;
+            }
+
+            .container {
+                padding: 1.5rem;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+                margin-bottom: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Main Menu</h2>
+        <ul class="menu-list">
+            <li class="menu-item">
+                <a href="{{ url_for('add_url') }}" class="menu-link">Add URL</a>
+            </li>
+            <li class="menu-item">
+                <a href="{{ url_for('remove_url') }}" class="menu-link remove">Remove URL</a>
+            </li>
+            <li class="menu-item">
+                <a href="{{ url_for('get_real_url') }}" class="menu-link">Get Real URL</a>
+            </li>
+            <li class="menu-item">
+                <a href="{{ url_for('req_info') }}" class="menu-link info">Request Info</a>
+            </li>
+        </ul>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div>
+                    {% for category, message in messages %}
+                        <div class="flash {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
     </div>
-  {% endif %}
-{% endwith %}
+</body>
+</html>
