@@ -89,7 +89,7 @@ class Server(NetworkWrapper):
             return b'ERR~4~Url Not Found'
         return b'STATS~' + pickle.dumps(d) + b'~' + fake_url + b'~' + self.retrieve_url(fake_url).encode()#type:ignore
     
-       
+    
     
     def cleanup(self):
         self._sock.close()
@@ -98,23 +98,6 @@ class Server(NetworkWrapper):
     def retrieve_url(self,urls,fake_url: bytes) -> str:
         return urls.get(fake_url.decode(),"<real_url_here> (debug)")
     
-    def manage_urls(func):
-        @wraps(func)
-        def wrapper(self, *args, **kwargs):
-            try:
-                with open(Server.urls_path, "r") as f:
-                    urls: dict[str, str] = json.load(f)
-            except (json.JSONDecodeError, FileNotFoundError):
-                urls = {}
-            
-            result = func(self, urls, *args, **kwargs)
-            
-            with open(Server.urls_path, "w") as f:
-                json.dump(urls, f, indent=4)
-
-            return result
-        
-        return wrapper
     
     @manage_urls
     def add_url(self, urls, real_url: bytes) -> bytes:
