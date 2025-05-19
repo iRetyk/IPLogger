@@ -37,6 +37,9 @@ class Spoofer:
         self.__target_mac = "1e:00:da:26:fe:10 "
         self.urls: Dict[str, str] = {}
 
+    def checkout(self):
+        pass   
+    
     def send_spoofed_packet(self) -> None:
         """
         Input: None
@@ -117,7 +120,7 @@ class Spoofer:
             sniff(filter="udp port 53", prn=self.process_packet, promisc=True, store=0, timeout=4)
             self.urls = self.get_urls()
 
-    def build_dict_from_packet(self, packet: Any) -> PacketData:
+    def build_dict_from_packet(self, packet: Any) -> Dict[str,str]:
         """
         Input: packet (Any) - Network packet to extract data from
         Output: PacketData - Dictionary containing packet information

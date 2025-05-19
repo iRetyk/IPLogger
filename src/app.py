@@ -74,7 +74,7 @@ class ClientManager:
         """
         return render_template('menu.html')
 
-    def login(self) -> Union[str, 'redirect']:
+    def login(self):
         """
         Input: self (ClientManager) - instance of the ClientManager class
         Output: str - rendered HTML template or redirect response
@@ -105,7 +105,7 @@ class ClientManager:
 
         return render_template('login.html')
 
-    def signup(self) -> Union[str, 'redirect']:
+    def signup(self):
         """
         Input: self (ClientManager) - instance of the ClientManager class
         Output: str - rendered HTML template or redirect response
@@ -152,7 +152,7 @@ class ClientManager:
         """
         return render_template('main_menu.html')
 
-    def add_url(self) -> Union[str, 'redirect']:
+    def add_url(self):
         """
         Input: self (ClientManager) - instance of the ClientManager class
         Output: str - rendered HTML template or redirect response
@@ -179,7 +179,7 @@ class ClientManager:
 
         return render_template('add_url.html')
 
-    def remove_url(self) -> Union[str, 'redirect']:
+    def remove_url(self):
         """
         Input: self (ClientManager) - instance of the ClientManager class
         Output: str - rendered HTML template or redirect response
@@ -206,7 +206,7 @@ class ClientManager:
 
         return render_template('remove_url.html')
 
-    def get_real_url(self) -> Union[str, 'redirect']:
+    def get_real_url(self):
         """
         Input: self (ClientManager) - instance of the ClientManager class
         Output: str - rendered HTML template or redirect response
@@ -233,7 +233,7 @@ class ClientManager:
 
         return render_template('get_real_url.html')
 
-    def req_info(self) -> Union[str, 'redirect']:
+    def req_info(self):
         """
         Input: self (ClientManager) - instance of the ClientManager class
         Output: str - rendered HTML template or redirect response

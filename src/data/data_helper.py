@@ -3,12 +3,9 @@ import os
 from typing import Dict, List, Optional, TypedDict
 
 # Type definitions for better type checking
-class PacketData(TypedDict):
-    IP: str
-    Time: str
 
 # Type aliases for better readability
-DataDict = Dict[str, List[PacketData]]
+DataDict = Dict[str, List[Dict[str,str]]]
 
 data_file_path = os.path.join(os.path.dirname(__file__), "data.json")
 
@@ -32,7 +29,7 @@ def save_data(data: DataDict) -> None:
     with open(data_file_path, 'w') as f:
         json.dump(data, f)
 
-def record_entry(fake_url: str, packet_dict: PacketData) -> None:
+def record_entry(fake_url: str, packet_dict: Dict[str,str]) -> None:
     """
     Input: fake_url (str) - the shortened/fake URL, packet_dict (PacketData) - dictionary containing request information
     Output: None
@@ -48,10 +45,10 @@ def record_entry(fake_url: str, packet_dict: PacketData) -> None:
 
     save_data(data)
 
-def fetch_stats(fake_url: str) -> Optional[List[PacketData]]:
+def fetch_stats(fake_url: str) -> Optional[List[Dict[str,str]]]:
     """
     Input: fake_url (str) - the shortened/fake URL to get statistics for
-    Output: List[PacketData] or None - list of recorded entries for the URL if found, None if not found
+    Output: List[Dict[str,str]] or None - list of recorded entries for the URL if found, None if not found
     Purpose: Retrieve access statistics for a specific fake URL
     Description: Fetches all recorded access entries for the given fake URL from the data store
     """
