@@ -1,6 +1,14 @@
 # Function Documentation
 
 ## app.py - Client Manager
+### Properties
+| Property Name | Type | Purpose | Description |
+|--------------|------|---------|-------------|
+| _sock | socket | Socket connection | Socket for server communication |
+| _app | Flask | Flask application | Web application instance |
+| _session | Dict[str, Any] | Session storage | Stores user session data |
+
+### Functions
 | Function Name        | Input                                            | Output                 | Purpose                                            | Description                                                              |
 |---------------------|--------------------------------------------------|------------------------|-------------------------------------------------------|--------------------------------------------------------------------------|
 | __init__           | self                                             | None                   | Initialize Flask application and socket connection    | Sets up Flask app with templates, creates socket connection, starts server |
@@ -17,7 +25,7 @@
 | req_info           | self                                             | str or redirect        | Request URL information                              | Gets information about specific URL entry                                 |
 | _nl2br_filter      | text (str)                                       | str                    | Convert newlines to HTML                             | Replaces newline characters with HTML break tags                          |
 
-## data_helper.py - Data Management
+## data/data_helper.py - Data Management
 | Function Name    | Input                                    | Output                | Purpose                      | Description                                           |
 |-----------------|------------------------------------------|----------------------|------------------------------|-------------------------------------------------------|
 | get_data        | None                                     | DataDict             | Read JSON data file          | Loads JSON data file into dictionary structure         |
@@ -26,6 +34,12 @@
 | fetch_stats     | fake_url (str)                           | List[PacketData]/None| Retrieve URL statistics      | Fetches recorded access entries for URL                |
 
 ## socket_wrapper/network_wrapper.py - Network Base Class
+### Properties
+| Property Name | Type | Purpose | Description |
+|--------------|------|---------|-------------|
+| _serv_sock | socket | Network socket | Base socket for network communication |
+
+### Functions
 | Function Name  | Input                                           | Output | Purpose                  | Description                                        |
 |---------------|------------------------------------------------|--------|--------------------------|---------------------------------------------------|
 | __init__      | None                                           | None   | Initialize network socket | Creates and configures socket with address reuse   |
@@ -50,6 +64,16 @@
 | req_info      | fake_url (str), err (str)               | bytes           | Create info request       | Formats request for URL statistics                 |
 
 ## socket_wrapper/server.py - Server Implementation
+### Properties
+| Property Name | Type | Purpose | Description |
+|--------------|------|---------|-------------|
+| __DEBUG | bool | Debug mode flag | Indicates if server is in debug mode |
+| __port | int | Server port | Port number server listens on |
+| __ip | str | Server IP | IP address server binds to |
+| _sock | socket | Client socket | Socket for client communication |
+| urls_path | str | URLs file path | Path to JSON file storing URL mappings |
+
+### Functions
 | Function Name    | Input                              | Output | Purpose                 | Description                                    |
 |-----------------|---------------------------------------|--------|-------------------------|------------------------------------------------|
 | __init__        | port (int)                           | None   | Initialize server socket | Sets up socket, binds to port, waits for client |
@@ -86,3 +110,71 @@
 | start_processes | host_ip, target_ip, router_ip (str)| None   | Start background processes| Launches HTTP server and DNS poisoning processes |
 | kill_processes | None                             | None   | Stop background processes| Terminates running background processes          |
 | main           | None                             | None   | Main server function     | Initializes and runs server with cleanup         |
+
+## networking.py - Network Packet Spoofing
+### Properties
+| Property Name | Type | Purpose | Description |
+|--------------|------|---------|-------------|
+| __ip | str | Host IP | IP address of host machine |
+| __target_ip | str | Target IP | IP of target machine |
+| __router_ip | str | Router IP | IP address of router |
+| __target_mac | str | Target MAC | MAC address of target |
+| urls | Dict[str, str] | URL mappings | Dictionary of URL mappings |
+
+### Functions
+| Function Name | Input | Output | Purpose | Description |
+|--------------|-------|--------|----------|-------------|
+| __init__ | host_ip, target_ip, router_ip (str) | None | Initialize spoofer | Sets up spoofer with network addresses and target MAC |
+| send_spoofed_packet | None | None | Send spoofed ARP | Creates and sends ARP packet pretending to be router |
+| restore_defaults | dest, source (str) | None | Restore ARP mappings | Sends ARP packets to restore original network config |
+| get_mac | ip (str) | str | Get MAC address | Uses ARP to discover MAC address of given IP |
+| process_packet | packet (Any) | None | Process DNS queries | Handles DNS queries, provides spoofed responses |
+| forward_to_router | None | None | MITM attack | Sniffs and processes network packets during attack |
+| build_dict_from_packet | packet (Any) | Dict[str,str] | Extract packet info | Creates dictionary with timestamp and source IP |
+| get_urls | None | Dict[str,str] | Load URL mappings | Loads URL mappings from urls.json file |
+| nslookup | domain (str) | Packet | DNS lookup | Sends DNS query and returns response packet |
+
+## http_helper.py - HTTP Request Handling
+### Properties
+| Property Name | Type | Purpose | Description |
+|--------------|------|---------|-------------|
+| MAPPER | ClientMapper | Client mapper | Maps client IPs to domains |
+
+### Functions
+| Function Name | Input | Output | Purpose | Description |
+|--------------|-------|--------|----------|-------------|
+| do_GET | None | None | Handle GET requests | Retrieves target domain for client IP, sends redirect |
+| do_POST | None | None | Handle POST requests | Delegates POST handling to GET handler |
+| run_http_server | port (int) | None | Start HTTP server | Creates and runs HTTP server with redirect handler |
+
+## dns_poison.py - DNS Spoofing
+### Properties
+| Property Name | Type | Purpose | Description |
+|--------------|------|---------|-------------|
+| URLS | Dict[str,str] | URL mappings | Dictionary of URLs to spoof |
+| SPOOF_IP | str | Spoof IP | IP to redirect to (localhost) |
+| INTERFACE | str | Network interface | Interface for packet sniffing |
+| MAPPER | ClientMapper | Client mapper | Maps clients to domains |
+
+### Functions
+| Function Name | Input | Output | Purpose | Description |
+|--------------|-------|--------|----------|-------------|
+| load_urls | None | Dict[str,str] | Load URL mappings | Loads mappings from urls.json or uses defaults |
+| dns_spoof | pkt (Any) | None | Handle DNS spoofing | Analyzes DNS queries, sends spoofed responses |
+| build_dict_from_packet | pkt (Any) | Dict[str,str] | Extract packet info | Creates dict with source IP and timestamp |
+
+## cli_mapper.py - Client IP Mapping
+### Properties
+| Property Name | Type | Purpose | Description |
+|--------------|------|---------|-------------|
+| __map | Dict[str,str] | Client mappings | Maps client IPs to domains |
+| __lock | Lock | Thread lock | Synchronization for thread safety |
+
+### Functions
+| Function Name | Input | Output | Purpose | Description |
+|--------------|-------|--------|----------|-------------|
+| __init__ | None | None | Initialize mapper | Creates empty map and thread lock |
+| add_client | ip, domain (str) | None | Add client mapping | Maps client IP to requested domain |
+| get_domain | ip (str) | str | Get client domain | Retrieves and removes domain mapping for IP |
+| get_map | None | None | Load client mappings | Loads IP-domain mappings from file |
+| save_map | None | None | Save client mappings | Saves current mappings to file |
