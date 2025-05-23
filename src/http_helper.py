@@ -1,6 +1,7 @@
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
 from typing import Dict, Optional, Tuple, Union, cast
+
 from cli_mapper import ClientMapper
 
 MAPPER = ClientMapper()

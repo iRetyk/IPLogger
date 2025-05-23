@@ -1,4 +1,5 @@
 import socket
+
 from typing import Optional, Union
 
 class NetworkWrapper:
