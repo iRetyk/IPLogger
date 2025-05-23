@@ -1,5 +1,4 @@
 from http.server import HTTPServer, BaseHTTPRequestHandler
-from urllib.parse import urlparse, parse_qs
 from typing import Dict, Optional, Tuple, Union, cast
 
 from cli_mapper import ClientMapper
@@ -19,8 +18,7 @@ class RedirectHandler(BaseHTTPRequestHandler):
         # Get the website parameter, default to google if not provided
         client_ip = cast(Tuple[str, int], self.client_address)[0]
         website = MAPPER.get_domain(client_ip)
-        parsed_path = urlparse(self.path)
-        params = parse_qs(parsed_path.query)
+
 
         # Add https:// if not present
         if not website.startswith('http://') and not website.startswith('https://'):
