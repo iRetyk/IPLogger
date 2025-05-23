@@ -1,7 +1,6 @@
 import os
 import signal
 import jinja2
-import markupsafe
 from typing import Tuple, Union
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from socket_wrapper import Client
