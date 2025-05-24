@@ -48,7 +48,7 @@ class Server(NetworkWrapper):
 
     urls_path = f"{Path(__file__).parent.parent.parent}/urls.json"
 
-    def __init__(self, port: int = 0) -> None:
+    def __init__(self,ip: str = "127.0.0.1", port: int = 0) -> None:
         """
         Input: port (int) - Port number to bind to, defaults to 0
         Output: None
@@ -59,7 +59,7 @@ class Server(NetworkWrapper):
         self.__DEBUG = not bool(port)
 
         self.__port = port
-        self.__ip = "127.0.0.1"
+        self.__ip = ip
         self._serv_sock.bind((self.__ip, self.__port))
         self._serv_sock.listen(100)
         self._sock, addr = self._serv_sock.accept()

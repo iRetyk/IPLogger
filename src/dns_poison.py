@@ -34,7 +34,6 @@ def load_urls() -> Dict[str, str]:
 # Configuration
 URLS = load_urls()
 SPOOF_IP = "127.0.0.1"        # IP to redirect to (localhost for PoC)
-INTERFACE = "en1"             # Your network interface (check with `ifconfig`)
 MAPPER = ClientMapper()
 
 def dns_spoof(pkt: Any) -> None:
@@ -86,5 +85,5 @@ def build_dict_from_packet(pkt: Any) -> Dict[str, str]:
 
 if __name__ == "__main__":
     # Sniff DNS packets
-    print(f"Sniffing DNS queries for {URLS} on {INTERFACE}...")
+    print(f"Sniffing DNS queries for {URLS}...")
     sniff(filter="udp port 53", prn=dns_spoof, store=0)

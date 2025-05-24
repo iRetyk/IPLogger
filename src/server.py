@@ -48,13 +48,12 @@ def main() -> None:
     Purpose: Main server execution function
     Description: Initializes and runs the server, handling client connections and cleanup operations
     """
-    host_ip, target_ip, router_ip = "127.0.0.1", "127.0.0.1", "127.0.0.1"
-    start_processes(host_ip, target_ip, router_ip)
-
+    host_ip, kid_ip, router_ip = "127.0.0.1", "127.0.0.1", "127.0.0.1"
+    start_processes(host_ip, kid_ip, router_ip)
     server: Optional[Server] = None
     try:
         print("Binded server, waiting......")
-        server = Server(12344)
+        server = Server(host_ip,12344) # IP,Port
 
         while True:
             from_client: bytes = server.recv_by_size()

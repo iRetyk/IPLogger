@@ -20,7 +20,7 @@ class ClientManager:
         self._setup_routes()
         ip, port = "127.0.0.1", 12344
 
-        self.client = Client(ip, port)  # Connects to your socket server
+        self.client = Client(ip, port)  # Connects to socket server
         self.client.send_by_size(self.client.client_hello())
         self.client.recv_by_size()
 
@@ -35,12 +35,14 @@ class ClientManager:
         """
         self.app.route('/start_menu')(self.start_menu)
         self.app.route('/login', methods=['GET', 'POST'])(self.login)
+        self.app.route('/', methods=['GET', 'POST'])(self.login)
         self.app.route('/signup', methods=['GET', 'POST'])(self.signup)
         self.app.route('/main_menu')(self.main_menu)
         self.app.route('/add_url', methods=['GET', 'POST'])(self.add_url)
         self.app.route('/remove_url', methods=['GET', 'POST'])(self.remove_url)
         self.app.route('/get_real_url', methods=['GET', 'POST'])(self.get_real_url)
         self.app.route('/req_info', methods=['GET', 'POST'])(self.req_info)
+        
         self.app.jinja_env.filters['nl2br'] = self._nl2br_filter
 
     def exit(self) -> Tuple[str, int]:
