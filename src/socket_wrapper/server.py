@@ -48,39 +48,38 @@ class Server(NetworkWrapper):
 
     urls_path = f"{Path(__file__).parent.parent.parent}/urls.json"
 
-    def __init__(self,ip: str = "127.0.0.1", port: int = 0) -> None:
+    def __init__(self, ip: str = "127.0.0.1", port: int = 0) -> None:
         """
         Input: port (int) - Port number to bind to, defaults to 0
         Output: None
-        Purpose: Initialize server socket and connection
-        Description: Sets up server socket, binds to specified port and waits for client
+        Purpose: Initialize server socket
+        Description: Sets up server socket and binds to specified port
         """
         super().__init__()
         self.__DEBUG = not bool(port)
-
         self.__port = port
         self.__ip = ip
         self._serv_sock.bind((self.__ip, self.__port))
         self._serv_sock.listen(100)
-        self._sock, addr = self._serv_sock.accept()
 
-    def recv_by_size(self) -> bytes:  # type: ignore
+    def recv_by_size(self, sock: Optional[socket] = None) -> bytes:
         """
-        Input: None
+        Input: sock (Optional[socket]) - Client socket to receive from
         Output: bytes - Received data from client
-        Purpose: Receive data from connected client
-        Description: Receives size-prefixed message from the client socket
+        Purpose: Receive data from specified client
+        Description: Uses parent class's recv_by_size with specified socket
         """
-        return super().recv_by_size(self._sock)
+        return super().recv_by_size(sock)
 
-    def send_by_size(self, to_send: bytes) -> None:  # type: ignore
+    def send_by_size(self, to_send: bytes, sock: Optional[socket] = None) -> None:
         """
         Input: to_send (bytes) - Data to send to client
+               sock (Optional[socket]) - Client socket to send to
         Output: None
-        Purpose: Send data to connected client
-        Description: Sends size-prefixed message through the client socket
+        Purpose: Send data to specified client
+        Description: Uses parent class's send_by_size with specified socket
         """
-        return super().send_by_size(to_send, self._sock)
+        return super().send_by_size(to_send, sock)
 
     def parse(self, data: bytes) -> bytes:
         """
@@ -136,9 +135,9 @@ class Server(NetworkWrapper):
         Input: None
         Output: None
         Purpose: Clean up server resources
-        Description: Closes the client socket connection
+        Description: Closes the server socket
         """
-        self._sock.close()
+        self._serv_sock.close()
 
     @manage_urls
     def retrieve_url(self, urls: UrlDict, fake_url: bytes) -> str:
