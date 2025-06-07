@@ -53,11 +53,17 @@ class NetworkWrapper:
 
             while len(msg) != size:
                 msg += sock.recv(128)
+                
         except socket.timeout:
             return b""  # Return empty on timeout to allow for clean interruption
 
-        print("Received >>>" + str(msg)[2:-1])
-        return msg
+        if encrypted: 
+            plain_msg = AES_decrypt(key,iv,msg) #type:ignore
+        else:
+            plain_msg = msg
+        
+        print("Received >>>" + str(plain_msg)[2:-1])
+        return plain_msg
 
     def send_by_size(self, to_send: bytes,key: Optional[bytes] = None, sock: Optional[socket.socket] = None,encrypted:bool = True) -> None:
         """
