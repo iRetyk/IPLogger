@@ -18,7 +18,7 @@ class NetworkWrapper:
         # Set a timeout to allow for clean interruption
         self._serv_sock.settimeout(1.0)
 
-    def recv_by_size(self, key, sock: Optional[socket.socket] = None) -> bytes:
+    def recv_by_size(self, key: Optional[bytes] = None, sock: Optional[socket.socket] = None,encrypted: bool = True) -> bytes:
         """
         Input: sock (Optional[socket.socket]) - Socket to receive from, uses default if None
         Output: bytes - Received message without size fields or empty bytes if disconnected
@@ -30,17 +30,18 @@ class NetworkWrapper:
             sock = self._serv_sock
 
         try:
-            
-            iv = sock.recv(16)
-            if not iv:
-                return b''
-            
-            while not b'|' in iv:
-                iv += sock.recv(4)
-            
-            parts = iv.split(b'|')
-            iv,msg_size = parts
-            
+            if encrypted:
+                iv = sock.recv(16)
+                if not iv:
+                    return b''
+                
+                while not b'|' in iv:
+                    iv += sock.recv(4)
+                
+                parts = iv.split(b'|')
+                iv,msg_size = parts
+            else:
+                msg_size: bytes = b''
             while b"~" not in msg_size:
                 chunk = sock.recv(1)
                 if not chunk:  # Client disconnected
@@ -58,7 +59,7 @@ class NetworkWrapper:
         print("Received >>>" + str(msg)[2:-1])
         return msg
 
-    def send_by_size(self, to_send: bytes,key, sock: Optional[socket.socket] = None) -> None:
+    def send_by_size(self, to_send: bytes,key: Optional[bytes] = None, sock: Optional[socket.socket] = None,encrypted:bool = True) -> None:
         """
         Input: to_send (bytes) - Data to send, sock (Optional[socket.socket]) - Socket to send through
         Output: None
@@ -67,10 +68,12 @@ class NetworkWrapper:
         """
         if sock is None:
             sock = self._serv_sock
-        
-        iv,cipher = AES_encrypt(key,to_send)
-        bytearray_data: bytes = str(len(cipher)).encode() + b'~' + cipher
-        
-        final_to_send :bytes = iv + b'|' + bytearray_data #type:ignore
+        if encrypted:
+            iv,cipher = AES_encrypt(key,to_send) #type:ignore
+            bytearray_data: bytes = str(len(cipher)).encode() + b'~' + cipher
+            
+            final_to_send :bytes = iv + b'|' + bytearray_data #type:ignore
+        else:
+            final_to_send = str(len(to_send)).encode() + b'~' + to_send
         print(" Sending>>>>> " + str(final_to_send)[2:-1])
         sock.send(final_to_send)

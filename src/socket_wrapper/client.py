@@ -1,5 +1,5 @@
 import pickle
-from typing import Dict, List, Tuple, Any, TypedDict
+from typing import Dict, List, Tuple, Any, TypedDict,Optional
 
 from socket_wrapper.network_wrapper import NetworkWrapper
 from encryptions import generate_AES_key,RSA_encrypt
@@ -21,26 +21,26 @@ class Client(NetworkWrapper):
         super().__init__()
         self.__ip = ip
         self.__port = port
-        self.__AES_key = None
+        self.__AES_key: Optional[bytes] = None
         self._serv_sock.connect((self.__ip, self.__port))
 
-    def recv_by_size(self) -> bytes:  # type: ignore
+    def recv_by_size(self,key: Optional[bytes] = None,encrypted: bool = True) -> bytes:  # type: ignore
         """
         Input: None
         Output: bytes - received data from server
         Purpose: Receive data from the server
         Description: Receives data from server using the parent class's receive method
         """
-        return super().recv_by_size(self.__AES_key, self._serv_sock)
+        return super().recv_by_size(self.__AES_key, self._serv_sock,encrypted)
 
-    def send_by_size(self,to_send: bytes,key = None) -> None:  # type: ignore
+    def send_by_size(self,to_send: bytes,key: Optional[bytes] = None,encrypted: bool = True) -> None:  # type: ignore
         """
         Input: to_send (bytes) - data to send to server
         Output: None
         Purpose: Send data to the server
         Description: Sends data to server using the parent class's send method
         """
-        return super().send_by_size(to_send,self.__AES_key, self._serv_sock)
+        return super().send_by_size(to_send,self.__AES_key, self._serv_sock,encrypted)
 
     def exchange_keys(self):
         """
@@ -50,8 +50,8 @@ class Client(NetworkWrapper):
         
         self.__AES_key = generate_AES_key()
 
-        server_key = self.recv_by_size()
-        self.send_by_size(RSA_encrypt(server_key,self.__AES_key),self.__AES_key)
+        server_key = self.recv_by_size(encrypted=False)
+        self.send_by_size(RSA_encrypt(server_key,self.__AES_key),encrypted=False)
         print("Sent AES key: ", self.__AES_key)
     
     

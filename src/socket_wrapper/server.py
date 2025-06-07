@@ -69,16 +69,16 @@ class Server(NetworkWrapper):
     def init_encryptions(self):
         self.__RSA_private, self.__RSA_public = generate_keys_RSA()
     
-    def recv_by_size(self,key, sock: Optional[socket] = None) -> bytes:
+    def recv_by_size(self,key: Optional[bytes]= None, sock: Optional[socket] = None, encrypted: bool = True) -> bytes:
         """
         Input: sock (Optional[socket]) - Client socket to receive from
         Output: bytes - Received data from client
         Purpose: Receive data from specified client
         Description: Uses parent class's recv_by_size with specified socket
         """
-        return super().recv_by_size(key,sock)
+        return super().recv_by_size(key,sock,encrypted)
 
-    def send_by_size(self, to_send: bytes,key, sock: Optional[socket] = None) -> None:
+    def send_by_size(self, to_send: bytes,key :Optional[bytes] = None, sock: Optional[socket] = None, encrypted: bool = True) -> None:
         """
         Input:  to_send (bytes) - Data to send to client
                 sock (Optional[socket]) - Client socket to send to
@@ -86,7 +86,7 @@ class Server(NetworkWrapper):
         Purpose: Send data to specified client
         Description: Uses parent class's send_by_size with specified socket
         """
-        return super().send_by_size(to_send, key,sock)
+        return super().send_by_size(to_send, key,sock,encrypted)
 
     
     def exchange_keys(self, sock: socket) -> bytes:
@@ -102,8 +102,8 @@ class Server(NetworkWrapper):
                 bytes: AES key
             """
             
-            self.send_by_size(self.__RSA_public,sock)
-            enc_key = self.recv_by_size(sock)
+            self.send_by_size(self.__RSA_public,sock=sock,encrypted=False)
+            enc_key = self.recv_by_size(sock=sock,encrypted=False)
 
             AES_key = RSA_decrypt(self.__RSA_private,enc_key)
             

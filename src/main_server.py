@@ -54,7 +54,6 @@ class ServerManager:
                 print(f"Error accepting client connection: {e}")
 
     def handle_hello(self,client_socket) -> bytes:
-        client_hello: bytes  = self.server.recv_by_size(client_socket) 
         return self.server.exchange_keys(client_socket)
     
     
@@ -69,8 +68,6 @@ class ServerManager:
         print(f"New client connected from {client_address}")
         try:
             client_AES_key = self.handle_hello(client_socket)
-            
-            
             while self.running:
                 data = self.server.recv_by_size(client_AES_key,client_socket)
                 if not data:  # Empty data means timeout or disconnection
@@ -150,7 +147,7 @@ def main() -> None:
 
     try:
         print("Starting server, waiting for connections...")
-        server_manager = ServerManager(host_ip, 12344)
+        server_manager = ServerManager(host_ip, 12343)
         server_manager.start()  # This will run until interrupted
     except Exception as err:
         print(f'General error: {err}')

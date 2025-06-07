@@ -18,7 +18,7 @@ class ClientManager:
         self.app = Flask(__name__, template_folder=os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'ui')))
         self.app.secret_key = "your-secret-key"
         self._setup_routes()
-        ip, port = "127.0.0.1", 12344
+        ip, port = "127.0.0.1", 12343
 
         self.client = Client(ip, port)  # Connects to socket server
         self.handle_hello()
@@ -26,7 +26,6 @@ class ClientManager:
         self.app.run(debug=True, use_reloader=False)
 
     def handle_hello(self):
-        self.client.send_by_size(self.client.client_hello())
         self.client.exchange_keys()
         
     
