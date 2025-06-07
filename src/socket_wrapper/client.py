@@ -1,7 +1,8 @@
 import pickle
-
 from typing import Dict, List, Tuple, Any, TypedDict
+
 from socket_wrapper.network_wrapper import NetworkWrapper
+from encryptions import generate_AES_key,RSA_encrypt
 
 class PacketData(TypedDict):
     IP: str
@@ -20,7 +21,7 @@ class Client(NetworkWrapper):
         super().__init__()
         self.__ip = ip
         self.__port = port
-
+        self.__AES_key = None
         self._serv_sock.connect((self.__ip, self.__port))
 
     def recv_by_size(self) -> bytes:  # type: ignore
@@ -30,17 +31,30 @@ class Client(NetworkWrapper):
         Purpose: Receive data from the server
         Description: Receives data from server using the parent class's receive method
         """
-        return super().recv_by_size(self._serv_sock)
+        return super().recv_by_size(self.__AES_key, self._serv_sock)
 
-    def send_by_size(self, to_send: bytes) -> None:  # type: ignore
+    def send_by_size(self,to_send: bytes,key = None) -> None:  # type: ignore
         """
         Input: to_send (bytes) - data to send to server
         Output: None
         Purpose: Send data to the server
         Description: Sends data to server using the parent class's send method
         """
-        return super().send_by_size(to_send, self._serv_sock)
+        return super().send_by_size(to_send,self.__AES_key, self._serv_sock)
 
+    def exchange_keys(self):
+        """
+        swaps with server keys for AES using RSA
+        first the server sends public key, than clinet sends AES key encrypted using the public key, than server decrypts the AES key. Handshake done
+        """
+        
+        self.__AES_key = generate_AES_key()
+
+        server_key = self.recv_by_size()
+        self.send_by_size(RSA_encrypt(server_key,self.__AES_key),self.__AES_key)
+        print("Sent AES key: ", self.__AES_key)
+    
+    
     def parse(self, from_server: bytes) -> Tuple[str, str]:
         """
         Input: from_server (bytes) - message from server

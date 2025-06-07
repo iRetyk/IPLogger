@@ -7,6 +7,8 @@ from pathlib import Path
 from typing import List, Optional, Set, Dict
 from socket_wrapper import Server
 
+
+
 process_list: List[subprocess.Popen] = []
 
 class ServerManager:
@@ -22,7 +24,10 @@ class ServerManager:
         self.server = Server(host_ip, port)  # Single server instance
         self.client_sockets: Set[socket] = set()
         self.running = True
+        
+        
 
+    
     def start(self) -> None:
         """
         Input: None
@@ -48,6 +53,11 @@ class ServerManager:
                     break
                 print(f"Error accepting client connection: {e}")
 
+    def handle_hello(self,client_socket) -> bytes:
+        client_hello: bytes  = self.server.recv_by_size(client_socket) 
+        return self.server.exchange_keys(client_socket)
+    
+    
     def handle_client(self, client_socket: socket) -> None:
         """
         Input: client_socket (socket) - Socket for the client connection
@@ -58,15 +68,18 @@ class ServerManager:
         client_address = client_socket.getpeername()
         print(f"New client connected from {client_address}")
         try:
+            client_AES_key = self.handle_hello(client_socket)
+            
+            
             while self.running:
-                data = self.server.recv_by_size(client_socket)
+                data = self.server.recv_by_size(client_AES_key,client_socket)
                 if not data:  # Empty data means timeout or disconnection
                     if self.running:  # If we're not shutting down, keep listening
                         continue
                     break
                 try:
                     response = self.server.parse(data)
-                    self.server.send_by_size(response, client_socket)
+                    self.server.send_by_size(response,client_AES_key, client_socket)
                 except socket_timeout:
                     continue  # Try again on timeout
                 except Exception:
@@ -121,6 +134,8 @@ def kill_processes() -> None:
         except Exception as e:
             print("couldn't kill process" + str(p))
             print(str(e))
+
+
 
 def main() -> None:
     """

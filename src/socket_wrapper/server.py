@@ -16,6 +16,8 @@ from socket_wrapper.network_wrapper import NetworkWrapper
 from users import Users
 from data.data_helper import fetch_stats
 
+from encryptions import generate_keys_RSA, RSA_decrypt
+
 T = TypeVar('T')
 UrlDict = Dict[str, str]
 
@@ -59,28 +61,56 @@ class Server(NetworkWrapper):
         self.__DEBUG = not bool(port)
         self.__port = port
         self.__ip = ip
+        self.init_encryptions()
         self._serv_sock.bind((self.__ip, self.__port))
         self._serv_sock.listen(100)
 
-    def recv_by_size(self, sock: Optional[socket] = None) -> bytes:
+
+    def init_encryptions(self):
+        self.__RSA_private, self.__RSA_public = generate_keys_RSA()
+    
+    def recv_by_size(self,key, sock: Optional[socket] = None) -> bytes:
         """
         Input: sock (Optional[socket]) - Client socket to receive from
         Output: bytes - Received data from client
         Purpose: Receive data from specified client
         Description: Uses parent class's recv_by_size with specified socket
         """
-        return super().recv_by_size(sock)
+        return super().recv_by_size(key,sock)
 
-    def send_by_size(self, to_send: bytes, sock: Optional[socket] = None) -> None:
+    def send_by_size(self, to_send: bytes,key, sock: Optional[socket] = None) -> None:
         """
-        Input: to_send (bytes) - Data to send to client
-               sock (Optional[socket]) - Client socket to send to
+        Input:  to_send (bytes) - Data to send to client
+                sock (Optional[socket]) - Client socket to send to
         Output: None
         Purpose: Send data to specified client
         Description: Uses parent class's send_by_size with specified socket
         """
-        return super().send_by_size(to_send, sock)
+        return super().send_by_size(to_send, key,sock)
 
+    
+    def exchange_keys(self, sock: socket) -> bytes:
+            """
+            swaps with client keys for AES using RSA
+            first the server sends public key, than client sends AES key encrypted using the public key, than server decrypts the AES key. Handshake done
+            
+
+            Args:
+                sock (socket): the socket
+
+            Returns:
+                bytes: AES key
+            """
+            
+            self.send_by_size(self.__RSA_public,sock)
+            enc_key = self.recv_by_size(sock)
+
+            AES_key = RSA_decrypt(self.__RSA_private,enc_key)
+            
+            print("Received AES key:",AES_key)
+            return AES_key
+
+    
     def parse(self, data: bytes) -> bytes:
         """
         Input: data (bytes) - Raw data received from client
@@ -96,8 +126,6 @@ class Server(NetworkWrapper):
             result = self.get_real_url(fields[1])
         elif code == b'ADD':
             result = self.add_url(fields[1])
-        elif code == b'HELLO':
-            result = self.server_hello()
         elif code == b'REQ':
             result = self.show_stats(fields[1])
         elif code == b'SIGN_UP':
@@ -107,15 +135,6 @@ class Server(NetworkWrapper):
         else:
             result = b'ERR~255'
         return result
-
-    def server_hello(self) -> bytes:
-        """
-        Input: None
-        Output: bytes - Acknowledgment message
-        Purpose: Handle initial client greeting
-        Description: Returns acknowledgment for client hello message
-        """
-        return b'ACK'
 
     def show_stats(self, fake_url: bytes) -> bytes:
         """
@@ -208,4 +227,4 @@ class Server(NetworkWrapper):
 
 if __name__ == "__main__":
     test = Server()
-    test.send_by_size(b'')
+    

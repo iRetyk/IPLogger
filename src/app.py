@@ -21,11 +21,15 @@ class ClientManager:
         ip, port = "127.0.0.1", 12344
 
         self.client = Client(ip, port)  # Connects to socket server
-        self.client.send_by_size(self.client.client_hello())
-        self.client.recv_by_size()
+        self.handle_hello()
 
         self.app.run(debug=True, use_reloader=False)
 
+    def handle_hello(self):
+        self.client.send_by_size(self.client.client_hello())
+        self.client.exchange_keys()
+        
+    
     def _setup_routes(self) -> None:
         """
         Input: self (ClientManager) - instance of the ClientManager class
