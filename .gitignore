@@ -3,3 +3,4 @@
 /.vscode/
 *.json
 *.DS_Store
+memory-bank/**
