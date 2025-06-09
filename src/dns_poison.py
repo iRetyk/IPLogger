@@ -86,4 +86,8 @@ def build_dict_from_packet(pkt: Any) -> Dict[str, str]:
 if __name__ == "__main__":
     # Sniff DNS packets
     print(f"Sniffing DNS queries for {URLS}...")
-    sniff(filter="udp port 53", prn=dns_spoof, store=0)
+    while True:
+        # Update sniffing list every 5 seconds
+        
+        sniff(filter="udp port 53", prn=dns_spoof, store=0,timeout=5)
+        load_urls()
