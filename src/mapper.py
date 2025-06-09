@@ -36,7 +36,7 @@ class ClientMapper:
             message: bytes = self.__sock.recv(64)
 
             ip = message.decode()
-            print(f"Redirecting {ip} to {self.__map[ip]}")
+            print(f"Redirecting {ip} to {self.__map.get(ip,'a non existent ip')}")
             self.__sock.send(self.__map.pop(ip,"www.default.com").encode())
             
             
