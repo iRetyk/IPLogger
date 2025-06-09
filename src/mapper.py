@@ -21,6 +21,7 @@ class ClientMapper:
         if dns_process:
             self.__sock = socket.socket()
             self.__sock.bind(("127.0.0.1",55554))
+            self.__sock.listen(1)
             self.__sock,_ = self.__sock.accept()
             self.__answer_thread: threading.Thread = threading.Thread(target=self.handle_request,daemon=True)
             self.__answer_thread.start()
@@ -32,9 +33,12 @@ class ClientMapper:
     
     def handle_request(self):
         while True:
-            ip: bytes = self.__sock.recv(64)
-            print(f"Redirecting {ip} to {self.__map[ip.decode()]}")
-            self.__sock.send(self.__map.pop(ip.decode(),"www.default.com").encode())
+            message: bytes = self.__sock.recv(64)
+
+            ip = message.decode()
+            print(f"Redirecting {ip} to {self.__map[ip]}")
+            self.__sock.send(self.__map.pop(ip,"www.default.com").encode())
+            
             
     
     def add_client(self, ip: str, domain: str) -> None:
@@ -55,4 +59,5 @@ class ClientMapper:
         """
         self.__sock.send(ip.encode())
         return self.__sock.recv(256).decode()
+
 
