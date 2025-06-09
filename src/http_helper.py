@@ -1,7 +1,7 @@
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from typing import Dict, Optional, Tuple, Union, cast
 
-from cli_mapper import ClientMapper
+from mapper import ClientMapper
 
 MAPPER = ClientMapper()
 

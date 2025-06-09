@@ -7,7 +7,7 @@ from scapy.layers.dns import DNS
 from scapy.all import *  # type: ignore
 
 from data.data_helper import record_entry
-from cli_mapper import ClientMapper
+from mapper import ClientMapper
 
 
 class UrlMapType(TypedDict):
