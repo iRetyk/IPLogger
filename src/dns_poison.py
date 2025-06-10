@@ -69,6 +69,7 @@ def dns_spoof(pkt: Any) -> None:
                 time.sleep(0.1)
             print(f"Spoofed DNS response sent: {qname} -> {SPOOF_IP}")
             record_entry(qname, build_dict_from_packet(pkt))
+            #print("Asked to recorded entry")
             MAPPER.add_client(srcip, URLS[qname])  # type: ignore
 
 def build_dict_from_packet(pkt: Any) -> Dict[str, str]:

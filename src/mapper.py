@@ -19,15 +19,18 @@ class ClientMapper:
         self.__map: Dict[str, str] = {}
         
         if dns_process:
+            print("Recieved dns process")
             self.__sock = socket.socket()
-            self.__sock.bind(("127.0.0.1",55554))
-            self.__sock.listen(1)
+            self.__sock.bind(("127.0.0.1",4444))
+            self.__sock.listen(2)
             self.__sock,_ = self.__sock.accept()
             self.__answer_thread: threading.Thread = threading.Thread(target=self.handle_request,daemon=True)
             self.__answer_thread.start()
         else:
+            print("Recieved http process")
             self.__sock = socket.socket()
-            self.__sock.connect(("127.0.0.1",55554))
+            self.__sock.connect(("127.0.0.1",4444))
+
 
         
     

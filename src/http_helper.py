@@ -3,7 +3,10 @@ from typing import Dict, Optional, Tuple, Union, cast
 
 from mapper import ClientMapper
 
-MAPPER = ClientMapper()
+
+
+if __name__ == "__main__":
+    MAPPER = ClientMapper()
 
 class RedirectHandler(BaseHTTPRequestHandler):
     """HTTP request handler for redirecting requests to specified domains."""
