@@ -4,7 +4,7 @@ import socket
 
 from typing import Dict, Optional
 
-SERVER_IP = "10.68.121.52"
+SERVER_IP = "10.68.121.147"
 
 class ClientMapper:
     """Class for mapping client IPs to their requested domains with thread-safe operations."""
@@ -49,6 +49,7 @@ class ClientMapper:
         Description: Maps a client IP to their requested domain in a thread-safe manner
         """
         self.__map[ip] = domain
+        log(f"Added ip {ip} to map - {domain = }")
 
     def get_domain(self, ip: str) -> str:
         """
@@ -57,7 +58,15 @@ class ClientMapper:
         Purpose: Retrieve and remove domain mapping for an IP
         Description: Gets and removes the domain mapping for a client IP, returning default if not found
         """
+        
+        if ip == "127.0.0.1":
+            ip = SERVER_IP
+        
         self.__sock.send(ip.encode())
+        log("Retrieved domainn name for " + str(ip))
         return self.__sock.recv(256).decode()
 
 
+def log(to_log):
+    with open('log.txt', 'a') as f:
+        f.writelines([to_log])

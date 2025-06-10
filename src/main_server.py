@@ -2,6 +2,8 @@ import subprocess
 import time
 import traceback
 import threading
+import time
+
 from socket import socket, timeout as socket_timeout
 from pathlib import Path
 from typing import List, Optional, Set, Dict
@@ -28,7 +30,7 @@ class ServerManager:
         
 
     
-    def start(self) -> None:
+    def run(self) -> None:
         """
         Input: None
         Output: None
@@ -109,11 +111,13 @@ def start_processes(host_ip: str, target_ip: str, router_ip: str) -> None:
     Description: Launches HTTP server and DNS poisoning processes, maintaining their references
                 in a global list
     """
-    global process_list
+    global process_list :List[subprocess.Popen]
 
-    http_process = subprocess.Popen(["python", "src/http_helper.py"])
+    arp_process = subprocess.Popen(["python","src/arp_spoofer.py",host_ip,target_ip,router_ip])
     dns_process = subprocess.Popen(["python", "src/dns_poison.py"])
-    process_list = [http_process, dns_process]
+    time.sleep(2)
+    http_process = subprocess.Popen(["python", "src/http_helper.py"])
+    process_list: List[subprocess.Popen] = [arp_process, dns_process,http_process]
 
 def kill_processes() -> None:
     """
@@ -148,7 +152,7 @@ def main() -> None:
     try:
         print("Starting server, waiting for connections...")
         server_manager = ServerManager(host_ip, 12343)
-        server_manager.start()  # This will run until interrupted
+        server_manager.run()  # This will run until interrupted
     except Exception as err:
         print(f'General error: {err}')
         print(traceback.format_exc())

@@ -34,7 +34,7 @@ def load_urls() -> Dict[str, str]:
 # Configuration
 URLS = load_urls()
 SPOOF_IP = "127.0.0.1"        # IP to redirect to (localhost for PoC)
-MAPPER = ClientMapper()
+MAPPER = ClientMapper(dns_process=True)
 
 def dns_spoof(pkt: Any) -> None:
     """
